@@ -1,4 +1,10 @@
-import { Injectable, Logger, NotFoundException, TooManyRequestsException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { DocumentType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { MistralService } from '../llm/mistral.service';
@@ -163,8 +169,9 @@ STRICT RULES:
       where: { userId, createdAt: { gte: today } },
     });
     if (count >= limit) {
-      throw new TooManyRequestsException(
+      throw new HttpException(
         `You have reached the daily generation limit of ${limit}. Please try again tomorrow.`,
+        HttpStatus.TOO_MANY_REQUESTS,
       );
     }
   }

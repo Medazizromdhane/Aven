@@ -1,8 +1,9 @@
 import {
   CanActivate,
   ExecutionContext,
+  HttpException,
+  HttpStatus,
   Injectable,
-  TooManyRequestsException,
 } from '@nestjs/common';
 
 interface AttemptWindow {
@@ -32,7 +33,10 @@ export class AuthThrottleGuard implements CanActivate {
     }
 
     if (current.count >= this.limit) {
-      throw new TooManyRequestsException('Too many authentication attempts. Please try again later.');
+      throw new HttpException(
+        'Too many authentication attempts. Please try again later.',
+        HttpStatus.TOO_MANY_REQUESTS,
+      );
     }
 
     current.count += 1;

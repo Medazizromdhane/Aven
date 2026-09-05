@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import type { NextFunction, Request, Response } from 'express';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -24,7 +25,7 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Cron-Secret'],
   });
   app.getHttpAdapter().getInstance().set('trust proxy', 1);
-  app.use((_req, res, next) => {
+  app.use((_req: Request, res: Response, next: NextFunction) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
