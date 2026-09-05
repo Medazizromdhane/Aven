@@ -18,9 +18,10 @@ export class StorageService {
 
   constructor() {
     const legacyAccountId = process.env.R2_ACCOUNT_ID;
-    const endpoint =
+    const configuredEndpoint =
       process.env.STORAGE_ENDPOINT ??
       (legacyAccountId ? `https://${legacyAccountId}.r2.cloudflarestorage.com` : undefined);
+    const endpoint = this.normalizeEndpoint(configuredEndpoint);
     const accessKeyId = process.env.STORAGE_ACCESS_KEY_ID ?? process.env.R2_ACCESS_KEY_ID;
     const secretAccessKey = process.env.STORAGE_SECRET_ACCESS_KEY ?? process.env.R2_SECRET_ACCESS_KEY;
 
@@ -36,6 +37,28 @@ export class StorageService {
 
     this.client = null;
     this.logger.warn('Persistent object storage is not configured. Local storage is development-only.');
+  }
+
+  private normalizeEndpoint(endpoint?: string): string | undefined {
+    if (!endpoint) return undefined;
+    let normalized = endpoint.replace(/\/+$/, '');
+    try {
+      const url = new URL(normalized);
+      const labels = url.hostname.split('.');
+      // Some Supabase dashboards show a bucket-prefixed host by mistake,
+      // such as bucket.project-ref.supabase.co. The S3 endpoint uses only the project ref.
+      if (labels.length === 4 && labels[2] === 'supabase' && labels[3] === 'co') {
+        url.hostname = labels.slice(1).join('.');
+        normalized = url.toString().replace(/\/+$/, '');
+      }
+    } catch {
+      this.logger.warn('STORAGE_ENDPOINT is not a valid URL');
+    }
+    // Supabase project URLs need the S3-compatible storage path appended.
+    if (normalized.includes('.supabase.co') && !normalized.includes('/storage/v1/s3')) {
+      return `${normalized}/storage/v1/s3`;
+    }
+    return normalized;
   }
 
   async upload(buffer: Buffer, contentType: string, keyPrefix = 'files'): Promise<string> {

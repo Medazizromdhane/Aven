@@ -69,7 +69,8 @@ Every service below has a genuinely free tier that does **not** ask for a card.
 2. Settings → Storage → S3 access: copy the endpoint and access keys.
 4. Set `STORAGE_ENDPOINT`, `STORAGE_ACCESS_KEY_ID`, `STORAGE_SECRET_ACCESS_KEY`,
   `STORAGE_BUCKET`, and `STORAGE_REGION=auto` in Render.
-  > Production intentionally rejects local disk storage because free web-service disks are ephemeral.
+  > The endpoint must look like `https://PROJECT_REF.supabase.co/storage/v1/s3`.
+  > Do not include the bucket name before the project ref.
 
 ### Step D — One-click app deployment (Render Blueprint)
 1. Push this repo to GitHub.

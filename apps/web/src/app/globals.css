@@ -110,6 +110,34 @@ a {
   color: var(--brand-dark);
 }
 
+.language-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.4rem 0.55rem;
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.language-switcher select {
+  cursor: pointer;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  outline: 0;
+}
+
+.language-switcher-dark {
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #c2c8bd;
+}
+
 .avatar {
   display: grid;
   height: 1.85rem;

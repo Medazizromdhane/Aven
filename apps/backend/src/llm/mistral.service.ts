@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
@@ -60,6 +60,12 @@ export class MistralService {
     if (!res.ok) {
       const text = await res.text();
       this.logger.error(`Mistral API error ${res.status}: ${text}`);
+      if (res.status === 429) {
+        throw new HttpException(
+          'AI generation is temporarily rate-limited. Please wait a minute and try again.',
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
+      }
       throw new Error(`Mistral API error ${res.status}`);
     }
 

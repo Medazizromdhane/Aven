@@ -11,16 +11,18 @@ import {
   UserRound,
 } from 'lucide-react';
 import { useAuth } from '@/lib/auth-store';
-
-const links = [
-  { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
-  { href: '/jobs', label: 'Explore jobs', icon: Compass },
-  { href: '/workspace', label: 'Workspace', icon: FileText },
-];
+import { useLanguage } from '@/lib/i18n';
+import { LanguageSwitcher } from './language-switcher';
 
 export function AppHeader() {
   const pathname = usePathname();
   const logout = useAuth((state) => state.logout);
+  const { t } = useLanguage();
+  const links = [
+    { href: '/dashboard', label: t('overview'), icon: LayoutDashboard },
+    { href: '/jobs', label: t('exploreJobs'), icon: Compass },
+    { href: '/workspace', label: t('workspace'), icon: FileText },
+  ];
 
   return (
     <header className="app-header">
@@ -43,6 +45,7 @@ export function AppHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <LanguageSwitcher />
           <Link href="/workspace" className="icon-button" title="Profile and documents" aria-label="Profile and documents">
             <UserRound size={18} />
           </Link>
