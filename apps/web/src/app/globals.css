@@ -1,0 +1,184 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand: #0d6b62;
+  --brand-dark: #084f49;
+  --ink: #172b2a;
+  --muted: #6b7b78;
+  --paper: #f7f8f3;
+  --panel: #ffffff;
+  --line: #dfe7e1;
+}
+
+body {
+  @apply text-gray-900 antialiased;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+}
+
+a {
+  text-decoration: none;
+  color: var(--brand);
+}
+
+.field {
+  @apply rounded-lg border bg-white px-3 py-2 text-sm outline-none transition;
+  border-color: var(--line);
+}
+
+.field:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(13, 107, 98, 0.12);
+}
+
+.display-type {
+  font-family: Georgia, "Times New Roman", serif;
+  letter-spacing: -0.035em;
+}
+
+.eyebrow {
+  color: var(--brand);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border-bottom: 1px solid var(--line);
+  background: rgba(247, 248, 243, 0.88);
+  backdrop-filter: blur(16px);
+}
+
+.brand-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--ink);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+}
+
+.brand-mark {
+  display: grid;
+  height: 2rem;
+  width: 2rem;
+  place-items: center;
+  border-radius: 0.65rem;
+  background: var(--brand);
+  color: white;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border-radius: 0.6rem;
+  padding: 0.55rem 0.75rem;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 600;
+  transition: 160ms ease;
+}
+
+.nav-link:hover,
+.nav-link-active {
+  background: #e8f0eb;
+  color: var(--brand-dark);
+}
+
+.icon-button {
+  display: grid;
+  height: 2.3rem;
+  width: 2.3rem;
+  place-items: center;
+  border-radius: 0.65rem;
+  color: var(--muted);
+  transition: 160ms ease;
+}
+
+.icon-button:hover {
+  background: #e8f0eb;
+  color: var(--brand-dark);
+}
+
+.avatar {
+  display: grid;
+  height: 1.85rem;
+  width: 1.85rem;
+  place-items: center;
+  border: 2px solid var(--paper);
+  border-radius: 999px;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 800;
+}
+
+.landing-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: #f4f4ed;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+}
+
+.landing-brand-mark {
+  display: grid;
+  height: 2rem;
+  width: 2rem;
+  place-items: center;
+  border-radius: 999px;
+  background: #c8f169;
+  color: #182013;
+}
+
+.landing-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: #9ca798;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.landing-title {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(3.6rem, 8vw, 7.8rem);
+  font-weight: 400;
+  letter-spacing: -0.065em;
+  line-height: 0.9;
+}
+
+.landing-title em {
+  color: #c8f169;
+  font-style: italic;
+}
+
+.landing-visual {
+  border: 1px solid rgba(200, 241, 105, 0.3);
+  border-radius: 2rem;
+  background: radial-gradient(circle at 65% 38%, rgba(200, 241, 105, 0.18), transparent 34%), #1b2119;
+}
+
+.landing-orbit {
+  position: absolute;
+  border: 1px solid rgba(200, 241, 105, 0.28);
+  border-radius: 999px;
+  transform: rotate(-28deg);
+}
+
+.landing-orbit-one { height: 16rem; width: 30rem; right: -5rem; top: 5rem; }
+.landing-orbit-two { height: 24rem; width: 42rem; right: -10rem; top: 1rem; border-color: rgba(200, 241, 105, 0.12); }

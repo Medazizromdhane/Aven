@@ -1,0 +1,57 @@
+# Render.com Blueprint — free API + frontend deployment.
+# Import via Render → New → Blueprint, pointing at this repo.
+services:
+  - type: web
+    name: aven-api
+    runtime: node
+    plan: free
+    rootDir: apps/backend
+    buildCommand: pnpm install && pnpm prisma:generate && pnpm build && pnpm prisma:push
+    startCommand: node dist/main.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: BACKEND_PORT
+        value: 4000
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: MISTRAL_API_KEY
+        sync: false
+      - key: STORAGE_ENDPOINT
+        sync: false
+      - key: STORAGE_ACCESS_KEY_ID
+        sync: false
+      - key: STORAGE_SECRET_ACCESS_KEY
+        sync: false
+      - key: STORAGE_BUCKET
+        value: visahunter
+      - key: STORAGE_REGION
+        value: auto
+      - key: JOBS_CRON_SECRET
+        generateValue: true
+      - key: WEB_URL
+        fromService:
+          type: web
+          name: aven-web
+          envVarKey: RENDER_EXTERNAL_URL
+
+  - type: web
+    name: aven-web
+    runtime: node
+    plan: free
+    rootDir: apps/web
+    buildCommand: pnpm install && pnpm build
+    startCommand: pnpm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: aven-api
+          envVarKey: RENDER_EXTERNAL_URL

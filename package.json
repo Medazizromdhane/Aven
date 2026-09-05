@@ -1,0 +1,21 @@
+{
+  "name": "visahunter-ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "VisaHunter AI — Find international jobs with visa sponsorship, auto-optimize applications.",
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "dev": "pnpm --parallel -r dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "backend": "pnpm --filter @visahunter/backend",
+    "web": "pnpm --filter @visahunter/web",
+    "db:generate": "pnpm --filter @visahunter/backend prisma:generate",
+    "db:migrate": "pnpm --filter @visahunter/backend prisma:migrate",
+    "db:studio": "pnpm --filter @visahunter/backend prisma:studio"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

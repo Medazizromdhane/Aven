@@ -1,0 +1,284 @@
+// VisaHunter AI — Prisma schema
+// PostgreSQL data model for users, CVs, jobs, matching, generated documents, applications.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum Plan {
+  FREE
+  PRO
+  PREMIUM
+}
+
+enum WorkPreference {
+  REMOTE
+  HYBRID
+  ONSITE
+}
+
+enum JobSource {
+  GREENHOUSE
+  LEVER
+  REMOTIVE
+  THEMUSE
+  ADZUNA
+  JSEARCH
+  MANUAL
+}
+
+enum ApplicationStatus {
+  SAVED
+  APPLIED
+  PENDING
+  INTERVIEW
+  OFFER
+  REJECTED
+}
+
+enum DocumentType {
+  RESUME
+  COVER_LETTER
+}
+
+enum AuthProvider {
+  EMAIL
+  GOOGLE
+  LINKEDIN
+}
+
+// ---------------------------------------------------------------------------
+// Users & profile
+// ---------------------------------------------------------------------------
+
+model User {
+  id            String       @id @default(cuid())
+  email         String       @unique
+  passwordHash  String?
+  provider      AuthProvider @default(EMAIL)
+  emailVerified Boolean      @default(false)
+  fullName      String?
+  avatarUrl     String?
+
+  plan          Plan     @default(FREE)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  profile      Profile?
+  cvs          Cv[]
+  matches      JobMatch[]
+  applications Application[]
+  documents    GeneratedDocument[]
+
+  @@index([email])
+}
+
+model Profile {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Extracted / user-provided identity
+  phone      String?
+  country    String?
+  city       String?
+
+  // Career facts (denormalized from active CV, editable)
+  headline          String?
+  yearsOfExperience Float?  @default(0)
+  skills            String[] @default([])
+  languages         String[] @default([])
+  certifications    String[] @default([])
+  favoriteTech      String[] @default([])
+
+  // Preferences
+  targetCountries   String[]         @default([])
+  desiredSalaryMin  Int?
+  desiredSalaryMax  Int?
+  currency          String           @default("USD")
+  workPreferences   WorkPreference[] @default([])
+  needsVisaSponsor  Boolean          @default(true)
+  willingToRelocate Boolean          @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// CV / resume storage + parsed structure
+// ---------------------------------------------------------------------------
+
+model Cv {
+  id        String  @id @default(cuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isPrimary Boolean @default(false)
+
+  fileName String
+  fileUrl  String
+  mimeType String
+  rawText  String @db.Text
+
+  // Structured extraction (also stored granular below for querying)
+  parsed Json?
+
+  fullName       String?
+  email          String?
+  phone          String?
+  country        String?
+  skills         String[] @default([])
+  languages      String[] @default([])
+  certifications String[] @default([])
+  yearsOfExp     Float?   @default(0)
+
+  experiences Experience[]
+  educations  Education[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Experience {
+  id        String  @id @default(cuid())
+  cvId      String
+  cv        Cv      @relation(fields: [cvId], references: [id], onDelete: Cascade)
+  title     String
+  company   String?
+  location  String?
+  startDate String?
+  endDate   String?
+  current   Boolean @default(false)
+  summary   String? @db.Text
+  skills    String[] @default([])
+}
+
+model Education {
+  id        String  @id @default(cuid())
+  cvId      String
+  cv        Cv      @relation(fields: [cvId], references: [id], onDelete: Cascade)
+  degree    String?
+  field     String?
+  school    String?
+  startDate String?
+  endDate   String?
+}
+
+// ---------------------------------------------------------------------------
+// Jobs (aggregated from providers) + visa analysis
+// ---------------------------------------------------------------------------
+
+model Job {
+  id       String    @id @default(cuid())
+  source   JobSource
+  sourceId String // provider's own id
+
+  title       String
+  company     String
+  location    String?
+  country     String?
+  remote      Boolean @default(false)
+  description String  @db.Text
+  url         String
+  applyUrl    String?
+
+  salaryMin Int?
+  salaryMax Int?
+  currency  String?
+  tags      String[] @default([])
+
+  // Visa analysis
+  hasVisaSponsorship Boolean  @default(false)
+  visaConfidence     Float    @default(0) // 0..1
+  visaKeywords       String[] @default([])
+  relocationSupport  Boolean  @default(false)
+
+  postedAt  DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  matches JobMatch[]
+
+  @@unique([source, sourceId])
+  @@index([hasVisaSponsorship])
+  @@index([country])
+}
+
+// ---------------------------------------------------------------------------
+// Matching (per user/job compatibility score)
+// ---------------------------------------------------------------------------
+
+model JobMatch {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId  String
+  job    Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  score      Int // 0..100
+  breakdown  Json? // per-dimension sub-scores
+  reasons    String[] @default([])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  application Application?
+
+  @@unique([userId, jobId])
+  @@index([userId, score])
+}
+
+// ---------------------------------------------------------------------------
+// Generated documents (tailored resume / cover letter)
+// ---------------------------------------------------------------------------
+
+model GeneratedDocument {
+  id     String       @id @default(cuid())
+  userId String
+  user   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type   DocumentType
+
+  jobId    String?
+  content  String @db.Text // markdown/plaintext source
+  fileUrl  String? // rendered PDF in storage
+  model    String? // which LLM produced it
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ---------------------------------------------------------------------------
+// Application tracking + automation proof
+// ---------------------------------------------------------------------------
+
+model Application {
+  id      String @id @default(cuid())
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  matchId String @unique
+  match   JobMatch @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  status       ApplicationStatus @default(SAVED)
+  resumeUrl    String?
+  coverLetterUrl String?
+  proofUrl     String? // screenshot of submission
+  automated    Boolean @default(false)
+  notes        String? @db.Text
+
+  appliedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userId, status])
+}
