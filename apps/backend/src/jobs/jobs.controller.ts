@@ -39,8 +39,6 @@ export class JobsController {
   }
 
   @Post('search')
-  @ApiBearerAuth()
-  @UseGuards(JwtAuthGuard)
   triggerSearch(@Body() dto: TriggerSearchDto) {
     return this.jobs.aggregate({
       keywords: dto.keywords ?? ['software engineer'],

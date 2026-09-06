@@ -15,26 +15,26 @@ export interface ChatOptions {
 }
 
 /**
- * Thin wrapper over the Mistral Chat Completions API (OpenAI-compatible shape).
+ * Thin wrapper over the Groq Chat Completions API (OpenAI-compatible shape).
  * No SDK dependency — uses native fetch so it works everywhere on Node >= 20.
  */
 @Injectable()
-export class MistralService {
-  private readonly logger = new Logger(MistralService.name);
-  private readonly endpoint = 'https://api.mistral.ai/v1/chat/completions';
+export class GroqService {
+  private readonly logger = new Logger('GroqService');
+  private readonly endpoint = 'https://api.groq.com/openai/v1/chat/completions';
 
   private get apiKey(): string {
-    const key = process.env.MISTRAL_API_KEY;
+    const key = process.env.GROQ_API_KEY;
     if (!key) {
-      throw new Error('MISTRAL_API_KEY is not configured');
+      throw new Error('GROQ_API_KEY is not configured');
     }
     return key;
   }
 
   private model(small = false): string {
     return small
-      ? process.env.MISTRAL_SMALL_MODEL ?? 'mistral-small-latest'
-      : process.env.MISTRAL_MODEL ?? 'mistral-large-latest';
+      ? process.env.GROQ_SMALL_MODEL ?? 'llama-3.1-8b-instant'
+      : process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile';
   }
 
   async chat(messages: ChatMessage[], options: ChatOptions = {}): Promise<string> {
@@ -59,14 +59,14 @@ export class MistralService {
 
     if (!res.ok) {
       const text = await res.text();
-      this.logger.error(`Mistral API error ${res.status}: ${text}`);
+      this.logger.error(`Groq API error ${res.status}: ${text}`);
       if (res.status === 429) {
         throw new HttpException(
-          'AI generation is temporarily rate-limited. Please wait a minute and try again.',
+          'La génération IA est temporairement limitée. Réessayez dans une minute.',
           HttpStatus.TOO_MANY_REQUESTS,
         );
       }
-      throw new Error(`Mistral API error ${res.status}`);
+      throw new Error(`Groq API error ${res.status}`);
     }
 
     const data = (await res.json()) as {

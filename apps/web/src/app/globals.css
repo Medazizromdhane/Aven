@@ -249,3 +249,16 @@ a {
 .google-button { display: flex; align-items: center; justify-content: center; gap: .65rem; border: 1px solid var(--line); border-radius: .75rem; background: white; padding: .75rem 1rem; color: var(--ink); font-size: .875rem; font-weight: 700; transition: 160ms ease; }
 .google-button:hover { border-color: #b9cbc0; background: #fbfdfb; box-shadow: 0 5px 18px rgba(23, 43, 42, .06); }
 .google-g { display: grid; height: 1.35rem; width: 1.35rem; place-items: center; border-radius: 999px; color: #4285f4; font-family: Arial, sans-serif; font-weight: 800; }
+.country-select { display: inline-flex; align-items: center; gap: .45rem; border: 1px solid var(--line); border-radius: .65rem; background: #fff; padding: .65rem .8rem; color: var(--brand); }
+.country-select select { border: 0; background: transparent; color: var(--ink); font-size: .875rem; outline: 0; }
+.search-empty { border: 1px solid var(--line); border-radius: 1.25rem; background: linear-gradient(135deg, #f5faf6, #fff); padding: 2rem; text-align: center; }
+.empty-icon { display: grid; height: 3rem; width: 3rem; margin: 0 auto .8rem; place-items: center; border-radius: 1rem; background: #e2f1e8; color: var(--brand); }
+.search-empty h2 { font-size: 1.05rem; font-weight: 800; }.search-empty p { margin: .45rem auto 1.2rem; max-width: 34rem; color: var(--muted); font-size: .875rem; }
+.external-search-grid { display: grid; gap: .7rem; text-align: left; sm:grid-template-columns: repeat(3, 1fr); }
+.external-search-card { display: flex; align-items: center; gap: .55rem; border: 1px solid var(--line); border-radius: .8rem; background: #fff; padding: .8rem; color: var(--ink); }.external-search-card strong { flex: 1; font-size: .85rem; }.external-search-card span { color: var(--muted); font-size: .7rem; }
+.profile-card { background: linear-gradient(145deg, #ffffff 0%, #f2f8f3 100%); }
+.profile-identity { display: flex; align-items: center; gap: .8rem; margin: -.35rem -.35rem 1.5rem; border-bottom: 1px solid var(--line); padding: .35rem .35rem 1.25rem; }
+.profile-avatar { display: grid; height: 3.25rem; width: 3.25rem; place-items: center; border-radius: 1.1rem; background: linear-gradient(135deg, #0d6b62, #79b89e); color: white; font-family: Georgia, serif; font-size: 1.15rem; font-weight: 700; box-shadow: 0 8px 18px rgba(13, 107, 98, .18); }
+.profile-status { margin-left: auto; color: #16805f; font-size: .72rem; font-weight: 800; }
+.workspace-card { transition: transform 180ms ease, box-shadow 180ms ease; }.workspace-card:hover { transform: translateY(-2px); box-shadow: 0 15px 34px rgba(23, 43, 42, .08); }
+@media (min-width: 640px) { .external-search-grid { grid-template-columns: repeat(3, 1fr); } }

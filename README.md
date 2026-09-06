@@ -1,7 +1,7 @@
 # VisaHunter AI
 
 Find international jobs with **visa sponsorship**, auto-score your fit, and generate
-ATS-optimized resumes & cover letters — powered by **Mistral AI**.
+ATS-optimized resumes & cover letters — powered by **Groq**.
 
 Monorepo:
 
@@ -21,7 +21,7 @@ pnpm install
 
 # configure env
 Copy-Item .env.example apps/backend/.env
-# edit apps/backend/.env and set MISTRAL_API_KEY + DATABASE_URL
+# edit apps/backend/.env and set GROQ_API_KEY + DATABASE_URL
 
 # database (for a new local database)
 pnpm --filter @visahunter/backend prisma:generate
@@ -35,7 +35,7 @@ pnpm dev
 - API: http://localhost:4000/api · Swagger: http://localhost:4000/docs
 - Web: http://localhost:3000
 
-Only `MISTRAL_API_KEY` and `DATABASE_URL` are required to boot. All job providers
+Only `GROQ_API_KEY` and `DATABASE_URL` are required to boot. All job providers
 that need keys (Adzuna, JSearch) auto-disable when unset; the free ones
 (Remotive, Greenhouse, Lever, The Muse) work with **no keys**.
 
@@ -53,7 +53,7 @@ Every service below has a genuinely free tier that does **not** ask for a card.
 | Frontend (Next)  | **Vercel** Hobby             | ❌ No        |
 | File storage     | **Supabase Storage** free    | ❌ No        |
 | Email            | **Resend** free (3k/mo)      | ❌ No        |
-| LLM              | **Mistral** (your key)       | —            |
+| LLM              | **Groq** (your key)          | —            |
 | Daily cron ping  | **cron-job.org**             | ❌ No        |
 
 ### Step A — Database (Neon)
@@ -80,7 +80,7 @@ Every service below has a genuinely free tier that does **not** ask for a card.
   - `aven-web` — Next.js frontend
 4. The Blueprint automatically connects the frontend API URL to the backend and
   configures backend CORS for the frontend. You do not need to create a Vercel project.
-5. Add the secret variables when Render prompts you: `DATABASE_URL`, `MISTRAL_API_KEY`,
+5. Add the secret variables when Render prompts you: `DATABASE_URL`, `GROQ_API_KEY`,
   `STORAGE_ENDPOINT`, `STORAGE_ACCESS_KEY_ID`, and `STORAGE_SECRET_ACCESS_KEY`.
   `JWT_SECRET` and `JOBS_CRON_SECRET` are generated automatically.
 

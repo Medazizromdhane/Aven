@@ -20,7 +20,7 @@ services:
         sync: false
       - key: JWT_SECRET
         generateValue: true
-      - key: MISTRAL_API_KEY
+      - key: GROQ_API_KEY
         sync: false
       - key: STORAGE_ENDPOINT
         sync: false

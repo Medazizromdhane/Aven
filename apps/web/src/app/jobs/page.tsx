@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth-store';
 import { AppHeader } from '@/components/app-header';
-import { Bookmark, ExternalLink, LoaderCircle, Search, SlidersHorizontal } from 'lucide-react';
+import { Bookmark, ExternalLink, Globe2, LoaderCircle, Search, SlidersHorizontal } from 'lucide-react';
 import { useLanguage } from '@/lib/i18n';
 
 interface Job {
@@ -25,6 +25,12 @@ interface Job {
   visaKeywords: string[];
   matchScore?: number | null;
 }
+
+const countries = [
+  ['🌍', 'Tous les pays', ''], ['🇫🇷', 'France', 'France'], ['🇩🇪', 'Allemagne', 'Germany'],
+  ['🇬🇧', 'Royaume-Uni', 'United Kingdom'], ['🇨🇦', 'Canada', 'Canada'], ['🇺🇸', 'États-Unis', 'United States'],
+  ['🇳🇱', 'Pays-Bas', 'Netherlands'], ['🇦🇺', 'Australie', 'Australia'], ['🇮🇪', 'Irlande', 'Ireland'],
+];
 
 export default function JobsPage() {
   const { token, hydrate } = useAuth();
@@ -67,18 +73,20 @@ export default function JobsPage() {
     }
   }
 
+  const externalQuery = encodeURIComponent(`${tech || 'software engineer'} ${country || ''} visa sponsorship`.trim());
+  const externalSearches = [
+    ['Google Jobs', `https://www.google.com/search?q=${externalQuery}&ibp=htl;jobs`, 'Recherche large'],
+    ['LinkedIn', `https://www.linkedin.com/jobs/search/?keywords=${externalQuery}`, 'Réseau professionnel'],
+    ['Indeed', `https://www.indeed.com/jobs?q=${externalQuery}`, 'Offres internationales'],
+  ];
+
   return (
     <><AppHeader /><main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-12">
       <header className="mb-7"><p className="eyebrow">{t('searchDesk')}</p><h1 className="display-type mt-2 text-4xl">{t('findPlace')}</h1><p className="mt-2 max-w-xl text-[var(--muted)]">{t('jobsCopy')}</p></header>
 
       <div className="mb-8 rounded-2xl border border-[var(--line)] bg-white p-4 shadow-sm">
         <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--ink)]"><SlidersHorizontal size={16} className="text-[var(--brand)]" /> {t('refineSearch')}</div><div className="flex flex-wrap items-center gap-3">
-        <input
-          placeholder={t('country')}
-          value={country}
-          onChange={(e) => setCountry(e.target.value)}
-          className="field"
-        />
+        <label className="country-select"><Globe2 size={15} /><select value={country} onChange={(e) => setCountry(e.target.value)} aria-label={t('country')}>{countries.map(([flag, label, value]) => <option key={label} value={value}>{flag} {label}</option>)}</select></label>
         <input
           placeholder={t('technologies')}
           value={tech}
@@ -170,7 +178,7 @@ export default function JobsPage() {
           </div>
         ))}
         {data?.length === 0 && (
-          <p className="text-gray-500">{t('noJobs')}</p>
+          <div className="search-empty"><div className="empty-icon"><Search size={22} /></div><h2>{t('noJobs')}</h2><p>Les sources automatiques n’ont rien retourné pour l’instant. Continuez avec une recherche directe :</p><div className="external-search-grid">{externalSearches.map(([label, url, caption]) => <a key={label} href={url} target="_blank" rel="noreferrer" className="external-search-card"><strong>{label}</strong><span>{caption}</span><ExternalLink size={14} /></a>)}</div></div>
         )}
       </div>
     </main></>

@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { MistralService } from '../llm/mistral.service';
+import { GroqService } from '../llm/mistral.service';
 
 export interface VisaAnalysis {
   hasVisaSponsorship: boolean;
@@ -52,7 +52,7 @@ const NEGATIVE_KEYWORDS = [
 export class VisaAnalysisService {
   private readonly logger = new Logger(VisaAnalysisService.name);
 
-  constructor(private readonly mistral: MistralService) {}
+  constructor(private readonly mistral: GroqService) {}
 
   /**
    * Fast, deterministic keyword pass. Runs on every job (free, no API cost).

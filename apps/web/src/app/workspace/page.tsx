@@ -172,13 +172,15 @@ export default function WorkspacePage() {
   }
 
   const userProfile = profile?.profile;
+  const initials = (profile?.fullName ?? profile?.email ?? 'A').split(' ').map((part) => part[0]).join('').slice(0, 2).toUpperCase();
   return (
     <><AppHeader /><main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-12">
       <header className="mb-8"><p className="eyebrow">{t('yourToolkit')}</p><h1 className="display-type mt-2 text-4xl">{t('makeMoveReady')}</h1><p className="mt-2 text-[var(--muted)]">{t('toolkitCopy')}</p></header>
       {message && <p className="mb-6 rounded-lg bg-blue-50 p-3 text-sm text-blue-900">{message}</p>}
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <section className="rounded-2xl border border-[var(--line)] bg-white p-6 shadow-sm">
+        <section className="profile-card rounded-2xl border border-[var(--line)] bg-white p-6 shadow-sm">
+          <div className="profile-identity"><div className="profile-avatar">{initials}</div><div><span className="eyebrow">Aven profile</span><h2 className="mt-1 text-xl font-semibold">{profile?.fullName || t('profile')}</h2><p className="text-sm text-[var(--muted)]">{profile?.email}</p></div><span className="profile-status">{profile ? '● Actif' : '○'}</span></div>
           <h2 className="mb-1 flex items-center gap-2 text-xl font-semibold"><UserRound size={19} className="text-[var(--brand)]" /> {t('profile')}</h2><p className="mb-4 text-sm text-[var(--muted)]">{t('profileCopy')}</p>
           <form key={profile ? JSON.stringify(userProfile) : 'profile-loading'} onSubmit={saveProfile} className="grid gap-3">
             <input name="fullName" defaultValue={profile?.fullName ?? ''} placeholder={t('fullName')} className="field" />
@@ -197,7 +199,7 @@ export default function WorkspacePage() {
           </form>
         </section>
 
-        <section className="rounded-2xl border border-[var(--line)] bg-white p-6 shadow-sm">
+        <section className="workspace-card rounded-2xl border border-[var(--line)] bg-white p-6 shadow-sm">
           <h2 className="mb-1 flex items-center gap-2 text-xl font-semibold"><FolderOpen size={19} className="text-[var(--brand)]" /> {t('cvLibrary')}</h2><p className="mb-4 text-sm text-[var(--muted)]">{t('cvCopy')}</p>
           <form onSubmit={uploadCv} className="flex flex-wrap gap-3">
             <input name="file" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required className="min-w-0 flex-1 text-sm" />
@@ -212,7 +214,7 @@ export default function WorkspacePage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-[var(--line)] bg-white p-6 shadow-sm">
+        <section className="workspace-card rounded-2xl border border-[var(--line)] bg-white p-6 shadow-sm">
           <h2 className="mb-1 flex items-center gap-2 text-xl font-semibold"><Settings2 size={19} className="text-[var(--brand)]" /> {t('applications')}</h2><p className="mb-4 text-sm text-[var(--muted)]">{t('applicationsCopy')}</p>
           <div className="space-y-3">
             {applications.map((application) => <div key={application.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-3">
@@ -225,7 +227,7 @@ export default function WorkspacePage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-[var(--line)] bg-white p-6 shadow-sm">
+        <section className="workspace-card rounded-2xl border border-[var(--line)] bg-white p-6 shadow-sm">
           <h2 className="mb-1 flex items-center gap-2 text-xl font-semibold"><FileText size={19} className="text-[var(--brand)]" /> {t('documents')}</h2><p className="mb-4 text-sm text-[var(--muted)]">{t('documentsCopy')}</p>
           <select value={selectedJob} onChange={(event) => setSelectedJob(event.target.value)} className="field mb-3 w-full">
             <option value="">{t('chooseJob')}</option>

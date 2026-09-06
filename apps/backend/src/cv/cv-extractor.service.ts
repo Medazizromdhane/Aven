@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { MistralService } from '../llm/mistral.service';
+import { GroqService } from '../llm/mistral.service';
 
 export interface ParsedExperience {
   title: string;
@@ -45,7 +45,7 @@ const EMPTY: ParsedCv = {
 export class CvExtractorService {
   private readonly logger = new Logger(CvExtractorService.name);
 
-  constructor(private readonly mistral: MistralService) {}
+  constructor(private readonly mistral: GroqService) {}
 
   /**
    * Use the LLM to convert raw CV text into a structured object.

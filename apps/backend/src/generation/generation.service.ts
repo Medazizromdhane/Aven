@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { DocumentType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { MistralService } from '../llm/mistral.service';
+import { GroqService } from '../llm/mistral.service';
 import { StorageService } from '../storage/storage.service';
 import { PdfService } from './pdf.service';
 
@@ -17,7 +17,7 @@ export class GenerationService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly mistral: MistralService,
+    private readonly mistral: GroqService,
     private readonly storage: StorageService,
     private readonly pdf: PdfService,
   ) {}
@@ -134,7 +134,7 @@ STRICT RULES:
         type,
         content,
         fileUrl,
-        model: process.env.MISTRAL_MODEL ?? 'mistral-large-latest',
+        model: process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile',
       },
     });
   }
