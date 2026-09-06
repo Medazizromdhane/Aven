@@ -18,6 +18,11 @@ export class RegisterDto {
   @IsString()
   @MaxLength(100)
   fullName?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  captchaToken?: string;
 }
 
 export class LoginDto {
@@ -30,4 +35,9 @@ export class LoginDto {
   @IsString()
   @MaxLength(72)
   password!: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  captchaToken?: string;
 }

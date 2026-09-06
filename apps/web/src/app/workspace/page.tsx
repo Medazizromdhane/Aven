@@ -6,6 +6,7 @@ import { api, downloadApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth-store';
 import { AppHeader } from '@/components/app-header';
 import { FileText, FolderOpen, Settings2, UserRound } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n';
 
 type Profile = {
   fullName?: string;
@@ -37,6 +38,7 @@ const statuses = ['SAVED', 'APPLIED', 'PENDING', 'INTERVIEW', 'OFFER', 'REJECTED
 
 export default function WorkspacePage() {
   const { token, hydrate } = useAuth();
+  const { t } = useLanguage();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [cvs, setCvs] = useState<Cv[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
@@ -73,7 +75,7 @@ export default function WorkspacePage() {
   if (!token) {
     return (
       <main className="mx-auto max-w-xl px-6 py-20">
-        <p>Please sign in to manage your profile, applications, and documents.</p>
+        <p>{t('signInRequired')}</p>
         <Link className="mt-4 inline-block font-semibold" href="/login">Sign in</Link>
       </main>
     );
@@ -101,7 +103,7 @@ export default function WorkspacePage() {
         }),
       });
       setProfile(updated);
-      setMessage('Profile saved.');
+      setMessage(t('profileSaved'));
     } catch (err) {
       setMessage((err as Error).message);
     } finally {
@@ -117,7 +119,7 @@ export default function WorkspacePage() {
     try {
       const uploaded = await api<Cv>('/cv/upload', { method: 'POST', body: form });
       setCvs((current) => [uploaded, ...current]);
-      setMessage('CV uploaded and parsed.');
+      setMessage(t('cvUploaded'));
       event.currentTarget.reset();
     } catch (err) {
       setMessage((err as Error).message);
@@ -161,7 +163,7 @@ export default function WorkspacePage() {
         body: JSON.stringify({ jobId: selectedJob }),
       });
       setDocuments((current) => [created, ...current]);
-      setMessage(`${type === 'resume' ? 'Resume' : 'Cover letter'} generated.`);
+      setMessage(`${type === 'resume' ? t('generateResume') : t('generateCover')} ${t('generated')}`);
     } catch (err) {
       setMessage((err as Error).message);
     } finally {
@@ -172,73 +174,73 @@ export default function WorkspacePage() {
   const userProfile = profile?.profile;
   return (
     <><AppHeader /><main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-12">
-      <header className="mb-8"><p className="eyebrow">Your toolkit</p><h1 className="display-type mt-2 text-4xl">Make your move ready.</h1><p className="mt-2 text-[var(--muted)]">Keep your story, applications, and next steps in one place.</p></header>
+      <header className="mb-8"><p className="eyebrow">{t('yourToolkit')}</p><h1 className="display-type mt-2 text-4xl">{t('makeMoveReady')}</h1><p className="mt-2 text-[var(--muted)]">{t('toolkitCopy')}</p></header>
       {message && <p className="mb-6 rounded-lg bg-blue-50 p-3 text-sm text-blue-900">{message}</p>}
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-2xl border border-[var(--line)] bg-white p-6 shadow-sm">
-          <h2 className="mb-1 flex items-center gap-2 text-xl font-semibold"><UserRound size={19} className="text-[var(--brand)]" /> Profile</h2><p className="mb-4 text-sm text-[var(--muted)]">Help Aven find the right fit.</p>
+          <h2 className="mb-1 flex items-center gap-2 text-xl font-semibold"><UserRound size={19} className="text-[var(--brand)]" /> {t('profile')}</h2><p className="mb-4 text-sm text-[var(--muted)]">{t('profileCopy')}</p>
           <form key={profile ? JSON.stringify(userProfile) : 'profile-loading'} onSubmit={saveProfile} className="grid gap-3">
-            <input name="fullName" defaultValue={profile?.fullName ?? ''} placeholder="Full name" className="field" />
-            <input name="headline" defaultValue={userProfile?.headline ?? ''} placeholder="Professional headline" className="field" />
+            <input name="fullName" defaultValue={profile?.fullName ?? ''} placeholder={t('fullName')} className="field" />
+            <input name="headline" defaultValue={userProfile?.headline ?? ''} placeholder={t('headline')} className="field" />
             <div className="grid gap-3 sm:grid-cols-2">
-              <input name="country" defaultValue={userProfile?.country ?? ''} placeholder="Country" className="field" />
-              <input name="city" defaultValue={userProfile?.city ?? ''} placeholder="City" className="field" />
+              <input name="country" defaultValue={userProfile?.country ?? ''} placeholder={t('country')} className="field" />
+              <input name="city" defaultValue={userProfile?.city ?? ''} placeholder={t('city')} className="field" />
             </div>
-            <input name="phone" defaultValue={userProfile?.phone ?? ''} placeholder="Phone" className="field" />
-            <input name="skills" defaultValue={userProfile?.skills?.join(', ') ?? ''} placeholder="Skills, separated by commas" className="field" />
-            <input name="favoriteTech" defaultValue={userProfile?.favoriteTech?.join(', ') ?? ''} placeholder="Target technologies" className="field" />
-            <input name="targetCountries" defaultValue={userProfile?.targetCountries?.join(', ') ?? ''} placeholder="Target countries" className="field" />
-            <label className="text-sm"><input name="needsVisaSponsor" type="checkbox" defaultChecked={userProfile?.needsVisaSponsor ?? true} /> <span className="ml-2">I need visa sponsorship</span></label>
-            <label className="text-sm"><input name="willingToRelocate" type="checkbox" defaultChecked={userProfile?.willingToRelocate ?? true} /> <span className="ml-2">I am willing to relocate</span></label>
-            <button disabled={busy} className="rounded-lg bg-brand px-4 py-2 font-semibold text-white disabled:opacity-60">Save profile</button>
+            <input name="phone" defaultValue={userProfile?.phone ?? ''} placeholder={t('phone')} className="field" />
+            <input name="skills" defaultValue={userProfile?.skills?.join(', ') ?? ''} placeholder={t('skillsHint')} className="field" />
+            <input name="favoriteTech" defaultValue={userProfile?.favoriteTech?.join(', ') ?? ''} placeholder={t('technologies')} className="field" />
+            <input name="targetCountries" defaultValue={userProfile?.targetCountries?.join(', ') ?? ''} placeholder={t('countries')} className="field" />
+            <label className="text-sm"><input name="needsVisaSponsor" type="checkbox" defaultChecked={userProfile?.needsVisaSponsor ?? true} /> <span className="ml-2">{t('needVisa')}</span></label>
+            <label className="text-sm"><input name="willingToRelocate" type="checkbox" defaultChecked={userProfile?.willingToRelocate ?? true} /> <span className="ml-2">{t('relocate')}</span></label>
+            <button disabled={busy} className="rounded-lg bg-brand px-4 py-2 font-semibold text-white disabled:opacity-60">{t('saveProfile')}</button>
           </form>
         </section>
 
         <section className="rounded-2xl border border-[var(--line)] bg-white p-6 shadow-sm">
-          <h2 className="mb-1 flex items-center gap-2 text-xl font-semibold"><FolderOpen size={19} className="text-[var(--brand)]" /> CVs</h2><p className="mb-4 text-sm text-[var(--muted)]">Your source material for stronger applications.</p>
+          <h2 className="mb-1 flex items-center gap-2 text-xl font-semibold"><FolderOpen size={19} className="text-[var(--brand)]" /> {t('cvLibrary')}</h2><p className="mb-4 text-sm text-[var(--muted)]">{t('cvCopy')}</p>
           <form onSubmit={uploadCv} className="flex flex-wrap gap-3">
             <input name="file" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" required className="min-w-0 flex-1 text-sm" />
-            <button disabled={busy} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">Upload and parse</button>
+            <button disabled={busy} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">{t('uploadParse')}</button>
           </form>
           <div className="mt-5 space-y-3">
             {cvs.map((cv) => <div key={cv.id} className="flex items-center justify-between border-b border-gray-100 pb-3 text-sm">
-              <span>{cv.fileName} {cv.isPrimary && <strong className="ml-2 text-green-700">Primary</strong>}</span>
-              <button onClick={() => downloadFile(`/cv/${cv.id}/download`, cv.fileName)} className="font-medium">Download</button>
+              <span>{cv.fileName} {cv.isPrimary && <strong className="ml-2 text-green-700">{t('primary')}</strong>}</span>
+              <button onClick={() => downloadFile(`/cv/${cv.id}/download`, cv.fileName)} className="font-medium">{t('download')}</button>
             </div>)}
-            {cvs.length === 0 && <p className="text-sm text-gray-500">Upload a text-based PDF or DOCX to activate matching and generation.</p>}
+            {cvs.length === 0 && <p className="text-sm text-gray-500">{t('uploadHint')}</p>}
           </div>
         </section>
 
         <section className="rounded-2xl border border-[var(--line)] bg-white p-6 shadow-sm">
-          <h2 className="mb-1 flex items-center gap-2 text-xl font-semibold"><Settings2 size={19} className="text-[var(--brand)]" /> Applications</h2><p className="mb-4 text-sm text-[var(--muted)]">A simple view of what is moving.</p>
+          <h2 className="mb-1 flex items-center gap-2 text-xl font-semibold"><Settings2 size={19} className="text-[var(--brand)]" /> {t('applications')}</h2><p className="mb-4 text-sm text-[var(--muted)]">{t('applicationsCopy')}</p>
           <div className="space-y-3">
             {applications.map((application) => <div key={application.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 pb-3">
               <div><strong>{application.match.job.title}</strong><p className="text-sm text-gray-600">{application.match.job.company}</p></div>
               <select value={application.status} onChange={(event) => updateApplication(application.id, event.target.value)} className="field w-auto">
-                {statuses.map((status) => <option key={status}>{status}</option>)}
+                {statuses.map((status) => <option key={status}>{t(status.toLowerCase())}</option>)}
               </select>
             </div>)}
-            {applications.length === 0 && <p className="text-sm text-gray-500">Save a job from the Jobs page to track it here.</p>}
+            {applications.length === 0 && <p className="text-sm text-gray-500">{t('noApplications')}</p>}
           </div>
         </section>
 
         <section className="rounded-2xl border border-[var(--line)] bg-white p-6 shadow-sm">
-          <h2 className="mb-1 flex items-center gap-2 text-xl font-semibold"><FileText size={19} className="text-[var(--brand)]" /> Tailored documents</h2><p className="mb-4 text-sm text-[var(--muted)]">Turn the right opportunity into a ready application.</p>
+          <h2 className="mb-1 flex items-center gap-2 text-xl font-semibold"><FileText size={19} className="text-[var(--brand)]" /> {t('documents')}</h2><p className="mb-4 text-sm text-[var(--muted)]">{t('documentsCopy')}</p>
           <select value={selectedJob} onChange={(event) => setSelectedJob(event.target.value)} className="field mb-3 w-full">
-            <option value="">Choose a job</option>
+            <option value="">{t('chooseJob')}</option>
             {jobs.map((job) => <option key={job.id} value={job.id}>{job.title} · {job.company}</option>)}
           </select>
           <div className="flex flex-wrap gap-3">
-            <button disabled={busy || !selectedJob} onClick={() => generate('resume')} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">Generate resume</button>
-            <button disabled={busy || !selectedJob} onClick={() => generate('cover-letter')} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold disabled:opacity-60">Generate cover letter</button>
+            <button disabled={busy || !selectedJob} onClick={() => generate('resume')} className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white disabled:opacity-60">{t('generateResume')}</button>
+            <button disabled={busy || !selectedJob} onClick={() => generate('cover-letter')} className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-semibold disabled:opacity-60">{t('generateCover')}</button>
           </div>
           <div className="mt-5 space-y-3">
             {documents.map((document) => <div key={document.id} className="flex items-center justify-between border-b border-gray-100 pb-3 text-sm">
               <span>{document.type === 'RESUME' ? 'Resume' : 'Cover letter'}</span>
-              <button onClick={() => downloadFile(`/generation/${document.id}/download`, document.type === 'RESUME' ? 'tailored-resume.pdf' : 'cover-letter.pdf')} className="font-medium">Download PDF</button>
+              <button onClick={() => downloadFile(`/generation/${document.id}/download`, document.type === 'RESUME' ? 'tailored-resume.pdf' : 'cover-letter.pdf')} className="font-medium">{t('download')} PDF</button>
             </div>)}
-            {documents.length === 0 && <p className="text-sm text-gray-500">Generated documents will appear here.</p>}
+            {documents.length === 0 && <p className="text-sm text-gray-500">{t('noDocuments')}</p>}
           </div>
         </section>
       </div>

@@ -6,6 +6,7 @@ import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth-store';
 import { AppHeader } from '@/components/app-header';
 import { Bookmark, ExternalLink, LoaderCircle, Search, SlidersHorizontal } from 'lucide-react';
+import { useLanguage } from '@/lib/i18n';
 
 interface Job {
   id: string;
@@ -27,6 +28,7 @@ interface Job {
 
 export default function JobsPage() {
   const { token, hydrate } = useAuth();
+  const { t } = useLanguage();
   const [visaOnly, setVisaOnly] = useState(false);
   const [remote, setRemote] = useState(false);
   const [country, setCountry] = useState('');
@@ -49,7 +51,7 @@ export default function JobsPage() {
   });
 
   async function searchJobs() {
-    setNotice('Searching live job sources…');
+    setNotice(t('searching'));
     try {
       await api('/jobs/search', {
         method: 'POST',
@@ -59,7 +61,7 @@ export default function JobsPage() {
         }),
       });
       await refetch();
-      setNotice('Live sources searched. Results are updated.');
+      setNotice(t('liveUpdated'));
     } catch (err) {
       setNotice((err as Error).message);
     }
@@ -67,25 +69,25 @@ export default function JobsPage() {
 
   return (
     <><AppHeader /><main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-12">
-      <header className="mb-7"><p className="eyebrow">The opportunity desk</p><h1 className="display-type mt-2 text-4xl">Find your next place.</h1><p className="mt-2 max-w-xl text-[var(--muted)]">Roles with a clearer path to sponsorship, relocation, and a future you can picture.</p></header>
+      <header className="mb-7"><p className="eyebrow">{t('searchDesk')}</p><h1 className="display-type mt-2 text-4xl">{t('findPlace')}</h1><p className="mt-2 max-w-xl text-[var(--muted)]">{t('jobsCopy')}</p></header>
 
       <div className="mb-8 rounded-2xl border border-[var(--line)] bg-white p-4 shadow-sm">
-        <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--ink)]"><SlidersHorizontal size={16} className="text-[var(--brand)]" /> Refine your search</div><div className="flex flex-wrap items-center gap-3">
+        <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--ink)]"><SlidersHorizontal size={16} className="text-[var(--brand)]" /> {t('refineSearch')}</div><div className="flex flex-wrap items-center gap-3">
         <input
-          placeholder="Country"
+          placeholder={t('country')}
           value={country}
           onChange={(e) => setCountry(e.target.value)}
           className="field"
         />
         <input
-          placeholder="Technology"
+          placeholder={t('technologies')}
           value={tech}
           onChange={(e) => setTech(e.target.value)}
           className="field"
         />
         <label className="flex items-center gap-1.5 text-sm">
           <input type="checkbox" checked={remote} onChange={(e) => setRemote(e.target.checked)} />
-          Remote
+          {t('remote')}
         </label>
         <label className="flex items-center gap-1.5 text-sm">
           <input
@@ -93,23 +95,23 @@ export default function JobsPage() {
             checked={visaOnly}
             onChange={(e) => setVisaOnly(e.target.checked)}
           />
-          Visa sponsorship only
+          {t('visaOnly')}
         </label>
         <button
           onClick={searchJobs}
           className="inline-flex items-center gap-2 rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)] disabled:opacity-60"
           disabled={isLoading}
         >
-          {isLoading ? <LoaderCircle size={15} className="animate-spin" /> : <Search size={15} />} Search live jobs
+          {isLoading ? <LoaderCircle size={15} className="animate-spin" /> : <Search size={15} />} {isLoading ? t('loading') : t('searchLive')}
         </button>
         {notice && <span className="text-sm text-gray-600">{notice}</span>}
         </div>
       </div>
 
-      {isLoading && <p>Loading jobs…</p>}
+      {isLoading && <p>{t('loading')}</p>}
       {!token && (
         <p className="mb-4 text-sm text-gray-500">
-          Log in to see personalized match scores.
+          {t('signInToScores')}
         </p>
       )}
 
@@ -130,9 +132,9 @@ export default function JobsPage() {
               )}
             </div>
             <div className="mt-3 flex flex-wrap gap-2 text-xs">
-              {job.remote && <Badge>Remote</Badge>}
-              {job.hasVisaSponsorship && <Badge className="bg-green-100 text-green-700">Visa sponsorship</Badge>}
-              {job.relocationSupport && <Badge>Relocation</Badge>}
+              {job.remote && <Badge>{t('remoteBadge')}</Badge>}
+              {job.hasVisaSponsorship && <Badge className="bg-green-100 text-green-700">{t('visaBadge')}</Badge>}
+              {job.relocationSupport && <Badge>{t('relocationBadge')}</Badge>}
               {job.salaryMax ? (
                 <Badge>
                   {job.currency ?? '$'} {job.salaryMin ?? '?'}–{job.salaryMax}
@@ -145,7 +147,7 @@ export default function JobsPage() {
               rel="noreferrer"
               className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold"
             >
-              Apply on employer site <ExternalLink size={14} />
+              {t('applyEmployer')} <ExternalLink size={14} />
             </a>
             {token && (
               <button
@@ -155,20 +157,20 @@ export default function JobsPage() {
                       method: 'POST',
                       body: JSON.stringify({ jobId: job.id }),
                     });
-                    setNotice('Job saved to your application tracker.');
+                    setNotice(t('savedApplication'));
                   } catch (err) {
                     setNotice((err as Error).message);
                   }
                 }}
                 className="ml-4 inline-flex items-center gap-1.5 text-sm font-semibold text-gray-700"
               >
-                <Bookmark size={14} /> Save application
+                <Bookmark size={14} /> {t('saveApplication')}
               </button>
             )}
           </div>
         ))}
         {data?.length === 0 && (
-          <p className="text-gray-500">No jobs yet. Trigger a search from the API or wait for the daily hunt.</p>
+          <p className="text-gray-500">{t('noJobs')}</p>
         )}
       </div>
     </main></>

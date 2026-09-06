@@ -28,7 +28,7 @@ export function AppHeader() {
     <header className="app-header">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-5 px-5 py-4 sm:px-8">
         <Link href="/dashboard" className="brand-lockup" aria-label="Aven home">
-          <span className="brand-mark"><BriefcaseBusiness size={17} strokeWidth={2.4} /></span>
+          <span className="brand-mark"><span className="brand-letter">A</span></span>
           <span>aven</span>
         </Link>
 

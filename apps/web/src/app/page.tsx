@@ -11,7 +11,7 @@ export default function HomePage() {
   return (
     <main className="landing-page min-h-screen overflow-hidden bg-[#111310] text-[#f4f4ed]">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-6 sm:px-8">
-        <span className="landing-brand"><span className="landing-brand-mark"><Sparkles size={15} /></span>aven</span>
+        <span className="landing-brand"><span className="landing-brand-mark" />aven</span>
         <div className="flex items-center gap-3">
           <LanguageSwitcher dark />
           <Link href="/login" className="hidden px-3 py-2 text-sm font-semibold text-[#c2c8bd] transition hover:text-white sm:block">{t('login')}</Link>
@@ -36,7 +36,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="border-y border-white/10 bg-[#181a17]"><div className="mx-auto grid max-w-7xl gap-0 px-5 sm:px-8 md:grid-cols-3">{[[Globe2, 'Find your horizon', 'Search international roles filtered for sponsorship and relocation.'], [ScanSearch, 'Know your fit', 'A grounded match score that shows what makes you stand out.'], [FileText, 'Show up ready', 'Generate truthful, tailored documents from your real experience.']].map(([Icon, title, desc], index) => <div key={title as string} className="border-b border-white/10 px-1 py-9 md:border-b-0 md:border-r md:px-8 md:first:pl-0 md:last:border-r-0"><p className="mb-5 text-xs font-bold text-[#697465]">0{index + 1}</p><div className="mb-4 text-[#c8f169]"><Icon size={20} /></div><h2 className="font-semibold">{title as string}</h2><p className="mt-2 max-w-xs text-sm leading-6 text-[#929b90]">{desc as string}</p></div>)}</div></section>
+      <section className="border-y border-white/10 bg-[#181a17]"><div className="mx-auto grid max-w-7xl gap-0 px-5 sm:px-8 md:grid-cols-3">{[[Globe2, t('featureHorizon'), t('featureHorizonCopy')], [ScanSearch, t('featureFit'), t('featureFitCopy')], [FileText, t('featureReady'), t('featureReadyCopy')]].map(([Icon, title, desc], index) => <div key={title as string} className="border-b border-white/10 px-1 py-9 md:border-b-0 md:border-r md:px-8 md:first:pl-0 md:last:border-r-0"><p className="mb-5 text-xs font-bold text-[#697465]">0{index + 1}</p><div className="mb-4 text-[#c8f169]"><Icon size={20} /></div><h2 className="font-semibold">{title as string}</h2><p className="mt-2 max-w-xs text-sm leading-6 text-[#929b90]">{desc as string}</p></div>)}</div></section>
     </main>
   );
 }
