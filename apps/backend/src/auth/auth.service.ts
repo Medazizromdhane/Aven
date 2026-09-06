@@ -12,6 +12,7 @@ export class AuthService {
   ) {}
 
   async register(dto: RegisterDto) {
+    if (!dto.termsAccepted) throw new UnauthorizedException('Please accept the terms to create an account');
     await this.verifyCaptcha(dto.captchaToken);
     const email = dto.email.trim().toLowerCase();
     const existing = await this.prisma.user.findUnique({ where: { email } });

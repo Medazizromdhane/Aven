@@ -24,6 +24,9 @@ interface Job {
   relocationSupport: boolean;
   visaKeywords: string[];
   matchScore?: number | null;
+  source?: string;
+  description?: string;
+  postedAt?: string;
 }
 
 const countries = [
@@ -40,6 +43,7 @@ export default function JobsPage() {
   const [country, setCountry] = useState('');
   const [tech, setTech] = useState('');
   const [notice, setNotice] = useState('');
+  const [searchingLive, setSearchingLive] = useState(false);
 
   useEffect(() => {
     hydrate();
@@ -57,6 +61,7 @@ export default function JobsPage() {
   });
 
   async function searchJobs() {
+    setSearchingLive(true);
     setNotice(t('searching'));
     try {
       await api('/jobs/search', {
@@ -70,7 +75,17 @@ export default function JobsPage() {
       setNotice(t('liveUpdated'));
     } catch (err) {
       setNotice((err as Error).message);
+    } finally {
+      setSearchingLive(false);
     }
+  }
+
+  function clearSearch() {
+    setCountry('');
+    setTech('');
+    setVisaOnly(false);
+    setRemote(false);
+    setNotice('');
   }
 
   const externalQuery = encodeURIComponent(`${tech || 'software engineer'} ${country || ''} visa sponsorship`.trim());
@@ -108,10 +123,11 @@ export default function JobsPage() {
         <button
           onClick={searchJobs}
           className="inline-flex items-center gap-2 rounded-lg bg-[var(--brand)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--brand-dark)] disabled:opacity-60"
-          disabled={isLoading}
+          disabled={isLoading || searchingLive}
         >
-          {isLoading ? <LoaderCircle size={15} className="animate-spin" /> : <Search size={15} />} {isLoading ? t('loading') : t('searchLive')}
+          {isLoading || searchingLive ? <LoaderCircle size={15} className="animate-spin" /> : <Search size={15} />} {isLoading || searchingLive ? t('loading') : t('searchLive')}
         </button>
+        <button type="button" onClick={clearSearch} className="clear-button">Effacer</button>
         {notice && <span className="text-sm text-gray-600">{notice}</span>}
         </div>
       </div>
@@ -123,14 +139,15 @@ export default function JobsPage() {
         </p>
       )}
 
+      {data && data.length > 0 && <p className="mb-3 text-sm font-semibold text-[var(--muted)]"><strong className="text-[var(--ink)]">{data.length}</strong> résultat{data.length > 1 ? 's' : ''} correspondant à votre recherche</p>}
       <div className="space-y-3">
         {data?.map((job) => (
-          <div key={job.id} className="rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+          <article key={job.id} className="job-card rounded-2xl border border-[var(--line)] bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
             <div className="flex items-start justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-[var(--ink)]">{job.title}</h3>
                 <p className="text-sm text-[var(--muted)]">
-                  {job.company} {job.location ? `· ${job.location}` : ''}
+                  {job.company} {job.location ? `· ${job.location}` : ''} {job.postedAt ? `· ${new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' }).format(new Date(job.postedAt))}` : ''}
                 </p>
               </div>
               {typeof job.matchScore === 'number' && (
@@ -140,6 +157,7 @@ export default function JobsPage() {
               )}
             </div>
             <div className="mt-3 flex flex-wrap gap-2 text-xs">
+              {job.source && <Badge>{job.source}</Badge>}
               {job.remote && <Badge>{t('remoteBadge')}</Badge>}
               {job.hasVisaSponsorship && <Badge className="bg-green-100 text-green-700">{t('visaBadge')}</Badge>}
               {job.relocationSupport && <Badge>{t('relocationBadge')}</Badge>}
@@ -149,6 +167,7 @@ export default function JobsPage() {
                 </Badge>
               ) : null}
             </div>
+            {job.description && <p className="job-description mt-4">{job.description.slice(0, 280)}{job.description.length > 280 ? '…' : ''}</p>}
             <a
               href={job.applyUrl ?? job.url}
               target="_blank"
@@ -175,7 +194,7 @@ export default function JobsPage() {
                 <Bookmark size={14} /> {t('saveApplication')}
               </button>
             )}
-          </div>
+          </article>
         ))}
         {data?.length === 0 && (
           <div className="search-empty"><div className="empty-icon"><Search size={22} /></div><h2>{t('noJobs')}</h2><p>Les sources automatiques n’ont rien retourné pour l’instant. Continuez avec une recherche directe :</p><div className="external-search-grid">{externalSearches.map(([label, url, caption]) => <a key={label} href={url} target="_blank" rel="noreferrer" className="external-search-card"><strong>{label}</strong><span>{caption}</span><ExternalLink size={14} /></a>)}</div></div>

@@ -21,15 +21,17 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [captchaToken, setCaptchaToken] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!termsAccepted) { setError(t('termsRequired')); return; }
     setLoading(true);
     setError('');
     try {
       const res = await api<{ accessToken: string; user: { email: string } }>('/auth/register', {
         method: 'POST',
-        body: JSON.stringify({ fullName, email, password, captchaToken: captchaToken || undefined }),
+        body: JSON.stringify({ fullName, email, password, captchaToken: captchaToken || undefined, termsAccepted }),
       });
       setAuth(res.accessToken, res.user.email);
       router.push('/dashboard');
@@ -52,6 +54,7 @@ export default function RegisterPage() {
         <label className="form-label">{t('email')}<input type="email" autoComplete="email" placeholder={t('emailAddress')} value={email} onChange={(e) => setEmail(e.target.value)} required className="field mt-1.5 w-full px-4 py-3" /></label>
         <label className="form-label">{t('password')}<span className="password-field mt-1.5"><input type={showPassword ? 'text' : 'password'} autoComplete="new-password" placeholder={t('passwordHint')} value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} className="field w-full px-4 py-3 pr-12" /><button type="button" className="password-toggle" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? 'Hide password' : 'Show password'}>{showPassword ? <EyeOff size={17} /> : <Eye size={17} />}</button></span></label>
         <Turnstile onToken={setCaptchaToken} />
+        <label className="consent-check"><input type="checkbox" checked={termsAccepted} onChange={(event) => setTermsAccepted(event.target.checked)} required /><span>{t('termsAccept')} <Link href="/terms">({t('terms')})</Link></span></label>
         {error && <div role="alert" className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-800"><AlertCircle className="mt-0.5 shrink-0" size={16} /><span>{error}</span></div>}
         <button
           type="submit"

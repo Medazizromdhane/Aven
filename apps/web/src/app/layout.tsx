@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Providers } from './providers';
+import { CookieConsent } from '@/components/cookie-consent';
+import { SiteFooter } from '@/components/site-footer';
 
 export const metadata: Metadata = {
   title: 'Aven — Your next move, made clearer',
@@ -12,7 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <Providers>{children}</Providers>
+        <Providers>{children}<SiteFooter /><CookieConsent /></Providers>
       </body>
     </html>
   );

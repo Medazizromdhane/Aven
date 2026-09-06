@@ -35,6 +35,7 @@ a {
 }
 
 .form-label { display: block; color: var(--ink); font-size: .78rem; font-weight: 800; letter-spacing: .01em; }
+.consent-check { display: flex; align-items: flex-start; gap: .55rem; color: var(--muted); font-size: .75rem; line-height: 1.45; }.consent-check input { margin-top: .15rem; accent-color: var(--brand); }.consent-check a { text-decoration: underline; }
 .password-field { position: relative; display: block; }
 .password-toggle { position: absolute; right: .75rem; top: 50%; display: grid; transform: translateY(-50%); color: var(--muted); }
 .password-toggle:hover { color: var(--brand); }
@@ -251,6 +252,7 @@ a {
 .google-g { display: grid; height: 1.35rem; width: 1.35rem; place-items: center; border-radius: 999px; color: #4285f4; font-family: Arial, sans-serif; font-weight: 800; }
 .country-select { display: inline-flex; align-items: center; gap: .45rem; border: 1px solid var(--line); border-radius: .65rem; background: #fff; padding: .65rem .8rem; color: var(--brand); }
 .country-select select { border: 0; background: transparent; color: var(--ink); font-size: .875rem; outline: 0; }
+.clear-button { border: 1px solid var(--line); border-radius: .65rem; padding: .65rem .8rem; color: var(--muted); font-size: .875rem; font-weight: 700; }.clear-button:hover { border-color: var(--brand); color: var(--brand); }
 .search-empty { border: 1px solid var(--line); border-radius: 1.25rem; background: linear-gradient(135deg, #f5faf6, #fff); padding: 2rem; text-align: center; }
 .empty-icon { display: grid; height: 3rem; width: 3rem; margin: 0 auto .8rem; place-items: center; border-radius: 1rem; background: #e2f1e8; color: var(--brand); }
 .search-empty h2 { font-size: 1.05rem; font-weight: 800; }.search-empty p { margin: .45rem auto 1.2rem; max-width: 34rem; color: var(--muted); font-size: .875rem; }
@@ -261,4 +263,9 @@ a {
 .profile-avatar { display: grid; height: 3.25rem; width: 3.25rem; place-items: center; border-radius: 1.1rem; background: linear-gradient(135deg, #0d6b62, #79b89e); color: white; font-family: Georgia, serif; font-size: 1.15rem; font-weight: 700; box-shadow: 0 8px 18px rgba(13, 107, 98, .18); }
 .profile-status { margin-left: auto; color: #16805f; font-size: .72rem; font-weight: 800; }
 .workspace-card { transition: transform 180ms ease, box-shadow 180ms ease; }.workspace-card:hover { transform: translateY(-2px); box-shadow: 0 15px 34px rgba(23, 43, 42, .08); }
+.job-card { content-visibility: auto; }.job-description { max-width: 70ch; color: var(--muted); font-size: .875rem; line-height: 1.55; }
+.site-footer { border-top: 1px solid var(--line); background: rgba(255,255,255,.55); color: var(--muted); font-size: .78rem; }.site-footer a { color: var(--muted); font-weight: 700; }.site-footer a:hover { color: var(--brand); }
+.cookie-banner { position: fixed; right: 1rem; bottom: 1rem; z-index: 50; display: flex; max-width: 34rem; align-items: flex-start; gap: .8rem; border: 1px solid var(--line); border-radius: 1rem; background: rgba(255,255,255,.96); padding: 1rem; box-shadow: 0 18px 50px rgba(23,43,42,.18); backdrop-filter: blur(12px); }.cookie-banner strong { font-size: .85rem; }.cookie-banner p { margin-top: .25rem; color: var(--muted); font-size: .75rem; line-height: 1.45; }.cookie-banner a { text-decoration: underline; }.cookie-icon { display: grid; height: 2rem; width: 2rem; flex: 0 0 auto; place-items: center; border-radius: .65rem; background: #e5f2e9; color: var(--brand); }.cookie-actions { display: flex; align-items: center; gap: .35rem; }.cookie-accept { border-radius: .55rem; background: var(--brand); padding: .5rem .7rem; color: white; font-size: .75rem; font-weight: 800; }.cookie-close { display: grid; height: 2rem; width: 2rem; place-items: center; color: var(--muted); }
+.legal-page { min-height: 75vh; padding: 2rem max(1.25rem, calc((100vw - 60rem) / 2)); }.legal-page article { max-width: 52rem; padding: 6rem 0; }.legal-page h1 { margin-top: .8rem; font-size: clamp(2.6rem, 6vw, 4.8rem); }.legal-page h2 { margin-top: 2.5rem; font-size: 1.2rem; font-weight: 800; }.legal-page p { margin-top: 1rem; color: var(--muted); line-height: 1.8; }.legal-date { font-size: .8rem; }
+@media (max-width: 640px) { .cookie-banner { right: .75rem; bottom: .75rem; left: .75rem; flex-wrap: wrap; }.cookie-actions { margin-left: 2.8rem; } }
 @media (min-width: 640px) { .external-search-grid { grid-template-columns: repeat(3, 1fr); } }
