@@ -22,8 +22,12 @@ services:
         generateValue: true
       - key: GROQ_API_KEY
         sync: false
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-120b
+      - key: GROQ_SMALL_MODEL
+        value: openai/gpt-oss-120b
       - key: STORAGE_ENDPOINT
-        sync: false
+        value: https://euglifuvnukxrodjdder.supabase.co/storage/v1/s3
       - key: STORAGE_ACCESS_KEY_ID
         sync: false
       - key: STORAGE_SECRET_ACCESS_KEY

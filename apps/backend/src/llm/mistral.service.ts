@@ -33,8 +33,8 @@ export class GroqService {
 
   private model(small = false): string {
     return small
-      ? process.env.GROQ_SMALL_MODEL ?? 'llama-3.1-8b-instant'
-      : process.env.GROQ_MODEL ?? 'llama-3.3-70b-versatile';
+      ? process.env.GROQ_SMALL_MODEL ?? 'openai/gpt-oss-120b'
+      : process.env.GROQ_MODEL ?? 'openai/gpt-oss-120b';
   }
 
   async chat(messages: ChatMessage[], options: ChatOptions = {}): Promise<string> {
