@@ -20,7 +20,7 @@ export function AppHeader() {
   const { t } = useLanguage();
   const links = [
     { href: '/dashboard', label: t('overview'), icon: LayoutDashboard },
-    { href: '/jobs', label: t('exploreJobs'), icon: Compass },
+    { href: '/jobs', label: t('navExploreJobs'), icon: Compass },
     { href: '/workspace', label: t('workspace'), icon: FileText },
   ];
 
