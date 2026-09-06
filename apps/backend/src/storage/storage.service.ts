@@ -26,10 +26,16 @@ export class StorageService {
     const secretAccessKey = process.env.STORAGE_SECRET_ACCESS_KEY ?? process.env.R2_SECRET_ACCESS_KEY;
 
     if (endpoint && accessKeyId && secretAccessKey) {
+      // Supabase (and most S3-compatible providers exposing a custom endpoint) require
+      // path-style addressing; virtual-hosted style would prepend the bucket to the host.
+      const isSupabase = /\.supabase\.(co|com)/.test(endpoint);
+      const forcePathStyle =
+        process.env.STORAGE_FORCE_PATH_STYLE === 'true' ||
+        (process.env.STORAGE_FORCE_PATH_STYLE !== 'false' && isSupabase);
       this.client = new S3Client({
         region: process.env.STORAGE_REGION ?? 'auto',
         endpoint,
-        forcePathStyle: process.env.STORAGE_FORCE_PATH_STYLE === 'true',
+        forcePathStyle,
         credentials: { accessKeyId, secretAccessKey },
       });
       return;
@@ -47,7 +53,7 @@ export class StorageService {
       const labels = url.hostname.split('.');
       // Some Supabase dashboards show a bucket-prefixed host by mistake,
       // such as bucket.project-ref.supabase.co. The S3 endpoint uses only the project ref.
-      if (labels.length === 4 && labels[2] === 'supabase' && labels[3] === 'co') {
+      if (labels.length === 4 && labels[2] === 'supabase' && (labels[3] === 'co' || labels[3] === 'com')) {
         url.hostname = labels.slice(1).join('.');
         normalized = url.toString().replace(/\/+$/, '');
       }
@@ -55,7 +61,7 @@ export class StorageService {
       this.logger.warn('STORAGE_ENDPOINT is not a valid URL');
     }
     // Supabase project URLs need the S3-compatible storage path appended.
-    if (normalized.includes('.supabase.co') && !normalized.includes('/storage/v1/s3')) {
+    if (/\.supabase\.(co|com)/.test(normalized) && !normalized.includes('/storage/v1/s3')) {
       return `${normalized}/storage/v1/s3`;
     }
     return normalized;
