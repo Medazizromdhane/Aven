@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { AlertCircle, ArrowRight, Eye, EyeOff, Sparkles, UserRound } from 'lucide-react';
+import { AlertCircle, ArrowRight, Eye, EyeOff, UserRound } from 'lucide-react';
 import { api, apiUrl } from '@/lib/api';
 import { useAuth } from '@/lib/auth-store';
 import { LanguageSwitcher } from '@/components/language-switcher';
@@ -45,10 +45,12 @@ export default function RegisterPage() {
 
   return (
     <main className="grid min-h-screen lg:grid-cols-[.85fr_1.15fr]">
-      <section className="hidden bg-[var(--ink)] p-12 text-white lg:flex lg:flex-col lg:justify-between"><div className="flex items-center justify-between"><Link href="/" className="brand-lockup text-white"><span className="brand-mark"><Sparkles size={16} /></span>aven</Link><LanguageSwitcher dark /></div><div><p className="mb-5 text-xs font-bold uppercase tracking-[0.18em] text-[#8fd0b2]">{t('startClarity')}</p><h2 className="display-type max-w-md text-5xl leading-tight">{t('nextMove')}</h2><p className="mt-5 max-w-sm leading-7 text-[#afc6bd]">{t('sideRegisterCopy')}</p></div><p className="text-sm text-[#78958a]">{t('footerLine')}</p></section>
+      <section className="hidden bg-[var(--ink)] p-12 text-white lg:flex lg:flex-col lg:justify-between"><div className="flex items-center justify-between"><Link href="/" className="brand-lockup text-white"><span className="brand-mark"><span className="brand-letter">A</span></span>aven</Link><LanguageSwitcher dark /></div><div><p className="mb-5 text-xs font-bold uppercase tracking-[0.18em] text-[#b7a6ff]">{t('startClarity')}</p><h2 className="display-type max-w-md text-5xl leading-tight">{t('nextMove')}</h2><p className="mt-5 max-w-sm leading-7 text-[#c4c0dc]">{t('sideRegisterCopy')}</p></div><p className="text-sm text-[#8f8bb0]">{t('footerLine')}</p></section>
       <section className="mx-auto flex w-full max-w-md flex-col justify-center px-6 py-12">
-      <div className="mb-12 flex items-center justify-between"><Link href="/" className="flex items-center gap-2 font-serif text-xl font-bold text-[var(--ink)] lg:hidden"><span className="brand-mark"><Sparkles size={15} /></span>aven</Link><LanguageSwitcher /></div>
-      <div className="mb-8"><div className="mb-4 grid h-11 w-11 place-items-center rounded-xl bg-[#e7f2eb] text-[var(--brand)]"><UserRound size={20} /></div><h1 className="display-type text-4xl">{t('registerTitle')}</h1><p className="mt-3 text-[var(--muted)]">{t('registerCopy')}</p></div>
+      <div className="mb-12 flex items-center justify-between"><Link href="/" className="flex items-center gap-2 font-serif text-xl font-bold text-[var(--ink)] lg:hidden"><span className="brand-mark"><span className="brand-letter">A</span></span>aven</Link><LanguageSwitcher /></div>
+      <div className="mb-8"><div className="mb-4 grid h-11 w-11 place-items-center rounded-xl bg-[var(--brand-soft)] text-[var(--brand)]"><UserRound size={20} /></div><h1 className="display-type text-4xl">{t('registerTitle')}</h1><p className="mt-3 text-[var(--muted)]">{t('registerCopy')}</p></div>
+      <a href={`${apiUrl}/api/auth/google`} className="google-button w-full"><span className="google-g">G</span>{t('continueGoogle')}</a>
+      <div className="my-5 flex items-center gap-3 text-xs text-[var(--muted)]"><span className="h-px flex-1 bg-[var(--line)]" />{t('orEmail')}<span className="h-px flex-1 bg-[var(--line)]" /></div>
       <form onSubmit={onSubmit} className="space-y-4">
         <label className="form-label">{t('fullName')}<input autoComplete="name" placeholder={t('fullName')} value={fullName} onChange={(e) => setFullName(e.target.value)} className="field mt-1.5 w-full px-4 py-3" /></label>
         <label className="form-label">{t('email')}<input type="email" autoComplete="email" placeholder={t('emailAddress')} value={email} onChange={(e) => setEmail(e.target.value)} required className="field mt-1.5 w-full px-4 py-3" /></label>
@@ -64,9 +66,7 @@ export default function RegisterPage() {
           {loading ? t('creating') : <>{t('createAccount')} <ArrowRight size={17} /></>}
         </button>
       </form>
-      <div className="my-5 flex items-center gap-3 text-xs text-[var(--muted)]"><span className="h-px flex-1 bg-[var(--line)]" />{t('or')}<span className="h-px flex-1 bg-[var(--line)]" /></div>
-      <a href={`${apiUrl}/api/auth/google`} className="google-button"><span className="google-g">G</span>{t('google')}</a>
-      <p className="mt-4 text-sm text-gray-600">
+      <p className="mt-6 text-sm text-[var(--muted)]">
         {t('alreadyAccount')} <Link href="/login">{t('signIn')}</Link>
       </p></section>
     </main>

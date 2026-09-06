@@ -120,6 +120,9 @@ export class JobsService {
     let mapped = jobs.map((j) => ({
       ...j,
       matchScore: userId ? (j as { matches?: { score: number }[] }).matches?.[0]?.score ?? null : null,
+      matchReasons: userId
+        ? (j as { matches?: { reasons: string[] }[] }).matches?.[0]?.reasons ?? []
+        : [],
     }));
 
     if (userId && filter.minScore) {
