@@ -45,6 +45,7 @@ export default function JobsPage() {
   const [tech, setTech] = useState('');
   const [notice, setNotice] = useState('');
   const [searchingLive, setSearchingLive] = useState(false);
+  const [recommending, setRecommending] = useState(false);
   const [sort, setSort] = useState<'recent' | 'match' | 'visa'>('recent');
 
   useEffect(() => {
@@ -92,6 +93,33 @@ export default function JobsPage() {
     }
   }
 
+  async function recommendFromCv() {
+    if (!token) {
+      setNotice(t('signInToScores'));
+      return;
+    }
+    setRecommending(true);
+    setNotice('Analyse de votre CV et classement des offres…');
+    try {
+      // If the DB is thin, pull fresh listings first, then score against the profile.
+      if (!data || data.length < 10) {
+        await api('/jobs/search', {
+          method: 'POST',
+          body: JSON.stringify({ keywords: ['software engineer'], countries: country ? [country] : [] }),
+        });
+      }
+      await api('/matching/recompute', { method: 'POST' });
+      await refetch();
+      setSort('match');
+      setNotice('Offres classées selon votre profil.');
+    } catch (err) {
+      const message = (err as Error).message;
+      setNotice(/profile/i.test(message) ? 'Ajoutez d’abord un CV principal pour obtenir des recommandations.' : message);
+    } finally {
+      setRecommending(false);
+    }
+  }
+
   function clearSearch() {
     setCountry('');
     setTech('');
@@ -109,9 +137,9 @@ export default function JobsPage() {
 
   return (
     <><AppHeader /><main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-12">
-      <header className="mb-7"><p className="eyebrow">{t('searchDesk')}</p><h1 className="display-type mt-2 text-4xl">{t('findPlace')}</h1><p className="mt-2 max-w-xl text-[var(--muted)]">{t('jobsCopy')}</p></header>
+      <header className="jobs-hero mb-8"><p className="eyebrow">{t('searchDesk')}</p><h1 className="display-type mt-2 text-4xl">{t('findPlace')}</h1><p className="mt-2 max-w-xl text-[#c4c0dc]">{t('jobsCopy')}</p></header>
 
-      <div className="mb-8 rounded-2xl border border-[var(--line)] bg-white p-4 shadow-sm">
+      <div className="filter-bar mb-8 p-4">
         <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--ink)]"><SlidersHorizontal size={16} className="text-[var(--brand)]" /> {t('refineSearch')}</div><div className="flex flex-wrap items-center gap-3">
         <label className="country-select"><Globe2 size={15} /><select value={country} onChange={(e) => setCountry(e.target.value)} aria-label={t('country')}>{countries.map(([flag, label, value]) => <option key={label} value={value}>{flag} {label}</option>)}</select></label>
         <input
@@ -139,6 +167,15 @@ export default function JobsPage() {
         >
           {isLoading || searchingLive ? <LoaderCircle size={15} className="animate-spin" /> : <Search size={15} />} {isLoading || searchingLive ? t('loading') : t('searchLive')}
         </button>
+        {token && (
+          <button
+            onClick={recommendFromCv}
+            disabled={recommending}
+            className="inline-flex items-center gap-2 rounded-lg border border-[var(--brand)] px-4 py-2 text-sm font-semibold text-[var(--brand)] transition hover:bg-[var(--brand-soft)] disabled:opacity-60"
+          >
+            {recommending ? <LoaderCircle size={15} className="animate-spin" /> : <Sparkles size={15} />} {recommending ? 'Analyse…' : 'Recommandé pour mon CV'}
+          </button>
+        )}
         <button type="button" onClick={clearSearch} className="clear-button">{t('clear')}</button>
         <label className="country-select ml-auto"><SlidersHorizontal size={14} /><select value={sort} onChange={(e) => setSort(e.target.value as typeof sort)} aria-label={t('sortBy')}><option value="recent">{t('sortRecent')}</option><option value="match">{t('sortMatch')}</option><option value="visa">{t('sortVisa')}</option></select></label>
         {notice && <span className="text-sm text-gray-600">{notice}</span>}
@@ -228,9 +265,9 @@ function JobCard({ job, token, onNotice }: { job: Job; token: string | null; onN
           </p>
         </div>
         {typeof job.matchScore === 'number' && (
-          <span className="shrink-0 rounded-full bg-[var(--brand-soft)] px-3 py-1 text-sm font-bold text-[var(--brand-dark)]">
-            {job.matchScore}%
-          </span>
+          <div className="match-ring" style={{ ['--score' as string]: job.matchScore }} title={`${job.matchScore}% ${t('sortMatch')}`}>
+            <span>{job.matchScore}%</span>
+          </div>
         )}
       </div>
 

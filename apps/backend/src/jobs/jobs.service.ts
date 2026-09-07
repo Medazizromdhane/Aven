@@ -17,6 +17,35 @@ export class JobsService {
   ) {}
 
   /**
+   * Personalized live search: merges the user's profile (target countries, favorite
+   * tech, top skills) into the query so results reflect their goals, then aggregates.
+   */
+  async searchAndAggregate(query: JobQuery, userId?: string): Promise<{ fetched: number; saved: number }> {
+    const keywords = new Set((query.keywords ?? []).filter(Boolean));
+    const countries = new Set((query.countries ?? []).filter(Boolean));
+
+    if (userId) {
+      const profile = await this.prisma.profile.findUnique({
+        where: { userId },
+        select: { targetCountries: true, favoriteTech: true, skills: true },
+      });
+      if (profile) {
+        profile.targetCountries.forEach((c) => countries.add(c));
+        profile.favoriteTech.forEach((tech) => keywords.add(tech));
+        profile.skills.slice(0, 3).forEach((skill) => keywords.add(skill));
+      }
+    }
+
+    if (keywords.size === 0) keywords.add('software engineer');
+
+    return this.aggregate({
+      ...query,
+      keywords: Array.from(keywords).slice(0, 10),
+      countries: Array.from(countries),
+    });
+  }
+
+  /**
    * Run all enabled providers, analyze visa sponsorship, and upsert jobs.
    * Returns the number of jobs created/updated.
    */
@@ -91,18 +120,31 @@ export class JobsService {
    * List jobs with filters. When userId is provided, join match scores.
    */
   async list(filter: JobFilterDto, userId?: string) {
-    const where: Prisma.JobWhereInput = {};
-    if (filter.country) where.country = { contains: filter.country, mode: 'insensitive' };
-    if (filter.remote !== undefined) where.remote = filter.remote;
-    if (filter.visaOnly) where.hasVisaSponsorship = true;
-    if (filter.salaryMin) where.salaryMax = { gte: filter.salaryMin };
-    if (filter.tech) {
-      where.OR = [
-        { title: { contains: filter.tech, mode: 'insensitive' } },
-        { description: { contains: filter.tech, mode: 'insensitive' } },
-        { tags: { has: filter.tech } },
-      ];
+    const and: Prisma.JobWhereInput[] = [];
+    if (filter.country) {
+      // Most providers store a full location string ("Paris, France", "Remote")
+      // rather than a clean country, so match the country against both fields.
+      and.push({
+        OR: [
+          { country: { contains: filter.country, mode: 'insensitive' } },
+          { location: { contains: filter.country, mode: 'insensitive' } },
+        ],
+      });
     }
+    if (filter.remote !== undefined) and.push({ remote: filter.remote });
+    if (filter.visaOnly) and.push({ hasVisaSponsorship: true });
+    if (filter.salaryMin) and.push({ salaryMax: { gte: filter.salaryMin } });
+    if (filter.tech) {
+      and.push({
+        OR: [
+          { title: { contains: filter.tech, mode: 'insensitive' } },
+          { description: { contains: filter.tech, mode: 'insensitive' } },
+          { tags: { has: filter.tech } },
+        ],
+      });
+    }
+
+    const where: Prisma.JobWhereInput = and.length ? { AND: and } : {};
 
     const take = Math.min(filter.take ?? 30, 100);
     const skip = filter.skip ?? 0;

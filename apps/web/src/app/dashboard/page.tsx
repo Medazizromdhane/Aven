@@ -22,11 +22,11 @@ export default function DashboardPage() {
   const profileProgress = data ? Math.min(100, data.jobsDetected > 0 ? 72 : 28) : 0;
 
   return <><AppHeader /><main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-10">
-    <header className="dashboard-hero mb-8 flex flex-wrap items-end justify-between gap-6">
-      <div><p className="eyebrow">{t('commandCenter')}</p><h1 className="display-type mt-2 text-4xl sm:text-5xl">{t('greeting')}</h1><p className="mt-3 max-w-xl text-[var(--muted)]">{t('dashboardCopy')}</p></div>
+    <header className="page-hero mb-8 flex flex-wrap items-end justify-between gap-6">
+      <div><p className="eyebrow">{t('commandCenter')}</p><h1 className="mt-2 text-4xl sm:text-5xl">{t('greeting')}</h1><p className="hero-copy mt-3 max-w-xl">{t('dashboardCopy')}</p></div>
       <div className="flex flex-wrap gap-3">
-        <Link href="/workspace" className="inline-flex items-center gap-2 rounded-xl border border-[var(--line)] px-4 py-2.5 text-sm font-semibold text-[var(--ink)] transition hover:border-[var(--brand)] hover:text-[var(--brand)]"><UserRound size={16} /> {t('workspace')}</Link>
-        <Link href="/jobs" className="primary-action"><Radar size={16} /> {t('exploreJobs')} <ArrowRight size={16} /></Link>
+        <Link href="/workspace" className="hero-ghost-btn"><UserRound size={16} /> {t('workspace')}</Link>
+        <Link href="/jobs" className="hero-solid-btn"><Radar size={16} /> {t('exploreJobs')} <ArrowRight size={16} /></Link>
       </div>
     </header>
     {isLoading && <LoadingState label={t('loading')} />}

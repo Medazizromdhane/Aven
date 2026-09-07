@@ -36,6 +36,39 @@ export interface JobQuery {
   limit?: number;
 }
 
+/** fetch() with an abort timeout so one slow board can't stall the whole hunt. */
+export async function fetchWithTimeout(
+  url: string,
+  init: RequestInit = {},
+  timeoutMs = 8000,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** Run async tasks with a bounded concurrency so we don't open 50 sockets at once. */
+export async function mapWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  task: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const results: R[] = [];
+  let index = 0;
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (index < items.length) {
+      const current = index++;
+      results[current] = await task(items[current]);
+    }
+  });
+  await Promise.all(workers);
+  return results;
+}
+
 /** Strip HTML tags to plain text (providers return HTML descriptions). */
 export function stripHtml(html: string): string {
   if (!html) return '';

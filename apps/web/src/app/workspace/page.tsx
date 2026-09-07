@@ -187,7 +187,7 @@ export default function WorkspacePage() {
   const completeness = Math.round((completenessChecks.filter(Boolean).length / completenessChecks.length) * 100);
   return (
     <><AppHeader /><main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 sm:py-10">
-      <header className="mb-6"><p className="eyebrow">{t('yourToolkit')}</p><h1 className="display-type mt-2 text-4xl">{t('makeMoveReady')}</h1><p className="mt-2 text-[var(--muted)]">{t('toolkitCopy')}</p></header>
+      <header className="page-hero mb-6"><p className="eyebrow">{t('yourToolkit')}</p><h1 className="mt-2 text-4xl">{t('makeMoveReady')}</h1><p className="hero-copy mt-2">{t('toolkitCopy')}</p></header>
       {message && <p className="mb-6 rounded-lg border border-[var(--line)] bg-[var(--brand-soft)] p-3 text-sm font-medium text-[var(--brand-dark)]">{message}</p>}
 
       <section className="profile-banner mb-6 p-6 sm:p-7">

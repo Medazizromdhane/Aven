@@ -24,40 +24,52 @@ export default function HomePage() {
 
   return (
     <main className="landing-page min-h-screen overflow-hidden bg-[#0b0918] text-[#f4f2fb]">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-6 sm:px-8">
-        <Link href="/" className="landing-brand"><Logo />aven</Link>
-        <div className="hidden items-center gap-7 text-sm text-[#a5a1c4] lg:flex">
-          <a href="#how" className="transition hover:text-white">{t('navHow')}</a>
-          <a href="#features" className="transition hover:text-white">{t('navFeatures')}</a>
-          <Link href="/jobs" className="transition hover:text-white">{t('navExploreJobs')}</Link>
-        </div>
-        <div className="flex items-center gap-3">
-          <LanguageSwitcher dark />
-          <Link href="/login" className="hidden px-3 py-2 text-sm font-semibold text-[#c4c0dc] transition hover:text-white sm:block">{t('login')}</Link>
-          <Link href="/register" className="accent-button text-sm">{t('signup')} <ArrowRight size={15} /></Link>
+      <nav className="landing-nav">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
+          <Link href="/" className="landing-brand"><Logo />aven</Link>
+          <div className="hidden items-center gap-7 text-sm text-[#a5a1c4] lg:flex">
+            <a href="#how" className="transition hover:text-white">{t('navHow')}</a>
+            <a href="#features" className="transition hover:text-white">{t('navFeatures')}</a>
+            <Link href="/jobs" className="transition hover:text-white">{t('navExploreJobs')}</Link>
+          </div>
+          <div className="flex items-center gap-3">
+            <LanguageSwitcher dark />
+            <Link href="/login" className="hidden px-3 py-2 text-sm font-semibold text-[#c4c0dc] transition hover:text-white sm:block">{t('login')}</Link>
+            <Link href="/register" className="accent-button text-sm">{t('signup')} <ArrowRight size={15} /></Link>
+          </div>
         </div>
       </nav>
 
-      <section className="mx-auto grid max-w-7xl gap-14 px-5 pb-20 pt-14 sm:px-8 lg:grid-cols-[1.05fr_.95fr] lg:items-center lg:pb-28 lg:pt-20">
-        <div>
-          <p className="landing-kicker"><span className="h-1.5 w-1.5 rounded-full bg-[#8b7bff]" /> {t('globalCareer')}</p>
-          <h1 className="landing-title mt-7 max-w-4xl">{t('heroTitle')}</h1>
-          <p className="mt-7 max-w-xl text-lg leading-8 text-[#a5a1c4]">{t('heroCopy')}</p>
-          <div className="mt-9 flex flex-wrap items-center gap-4">
-            <Link href="/register" className="accent-button">{t('startSearch')} <ArrowRight size={17} /></Link>
-            <Link href="/jobs" className="ghost-button">{t('exploreRoles')}</Link>
+      <section className="landing-hero">
+        <div className="landing-hero-aurora" />
+        <div className="landing-noise" />
+        <div className="mx-auto grid max-w-7xl gap-14 px-5 pb-20 pt-14 sm:px-8 lg:grid-cols-[1.05fr_.95fr] lg:items-center lg:pb-28 lg:pt-20">
+          <div>
+            <p className="hero-pill reveal-up"><span className="dot" /> {t('globalCareer')}</p>
+            <h1 className="landing-title reveal-up d1 mt-7 max-w-4xl">{t('heroTitle')}</h1>
+            <p className="reveal-up d2 mt-7 max-w-xl text-lg leading-8 text-[#a5a1c4]">{t('heroCopy')}</p>
+            <div className="reveal-up d3 mt-9 flex flex-wrap items-center gap-4">
+              <Link href="/register" className="accent-button">{t('startSearch')} <ArrowRight size={17} /></Link>
+              <Link href="/jobs" className="ghost-button">{t('exploreRoles')}</Link>
+            </div>
+            <div className="reveal-up d4 mt-10 max-w-md">
+              <p className="mb-3 inline-flex items-center gap-1.5 text-xs text-[#8a86a8]"><span className="h-1.5 w-1.5 rounded-full bg-[#8b7bff]" /> {t('trustedBy')}</p>
+              <div className="marquee">
+                <div className="marquee-track">
+                  {['Greenhouse', 'Lever', 'Remotive', 'The Muse', 'Adzuna', 'Google Jobs', 'Greenhouse', 'Lever', 'Remotive', 'The Muse', 'Adzuna', 'Google Jobs'].map((name, i) => (
+                    <span key={i}>{name}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-[#8a86a8]">
-            <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full bg-[#8b7bff]" /> {t('trustedBy')}</span>
-            <span>Greenhouse · Lever · Remotive · The Muse · Adzuna</span>
-          </div>
-        </div>
-        <div className="landing-visual relative min-h-[430px] p-4 sm:min-h-[510px] sm:p-7">
-          <div className="landing-orbit landing-orbit-one" /><div className="landing-orbit landing-orbit-two" />
-          <div className="relative flex h-full flex-col justify-between rounded-[1.4rem] border border-white/10 bg-[#171233]/90 p-5 shadow-2xl backdrop-blur sm:p-7">
-            <div className="flex items-center justify-between"><span className="text-sm font-bold">{t('opportunityMap')}</span><span className="rounded-full border border-[#8b7bff]/40 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-[#b7a6ff]">{t('live')}</span></div>
-            <div className="space-y-3 py-8"><Opportunity icon={<Globe2 size={18} />} title={t('visaRoles')} value={t('newThisWeek')} /><Opportunity icon={<ScanSearch size={18} />} title={t('strongestFit')} value="Product engineering · 92%" /><Opportunity icon={<FileText size={18} />} title={t('applicationReady')} value={t('resumeCover')} /></div>
-            <div className="rounded-xl bg-gradient-to-br from-[#6d5efc] to-[#a95bff] p-4 text-white"><p className="text-[10px] font-bold uppercase tracking-[0.15em] opacity-70">{t('nextBestMove')}</p><p className="mt-2 font-bold">{t('refineProfile')}</p><div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/25"><div className="h-full w-[72%] rounded-full bg-white" /></div></div>
+          <div className="landing-visual hero-visual-float relative min-h-[430px] p-4 sm:min-h-[510px] sm:p-7">
+            <div className="landing-orbit landing-orbit-one" /><div className="landing-orbit landing-orbit-two" />
+            <div className="relative flex h-full flex-col justify-between rounded-[1.4rem] border border-white/10 bg-[#171233]/90 p-5 shadow-2xl backdrop-blur sm:p-7">
+              <div className="flex items-center justify-between"><span className="text-sm font-bold">{t('opportunityMap')}</span><span className="rounded-full border border-[#8b7bff]/40 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-[#b7a6ff]">{t('live')}</span></div>
+              <div className="space-y-3 py-8"><Opportunity icon={<Globe2 size={18} />} title={t('visaRoles')} value={t('newThisWeek')} /><Opportunity icon={<ScanSearch size={18} />} title={t('strongestFit')} value="Product engineering · 92%" /><Opportunity icon={<FileText size={18} />} title={t('applicationReady')} value={t('resumeCover')} /></div>
+              <div className="rounded-xl bg-gradient-to-br from-[#6d5efc] to-[#a95bff] p-4 text-white"><p className="text-[10px] font-bold uppercase tracking-[0.15em] opacity-70">{t('nextBestMove')}</p><p className="mt-2 font-bold">{t('refineProfile')}</p><div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/25"><div className="h-full w-[72%] rounded-full bg-white" /></div></div>
+            </div>
           </div>
         </div>
       </section>

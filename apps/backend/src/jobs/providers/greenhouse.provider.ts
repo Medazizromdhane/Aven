@@ -1,6 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { JobSource } from '@prisma/client';
-import { JobProvider, JobQuery, NormalizedJob, stripHtml } from './provider.interface';
+import {
+  JobProvider,
+  JobQuery,
+  NormalizedJob,
+  fetchWithTimeout,
+  mapWithConcurrency,
+  stripHtml,
+} from './provider.interface';
 
 /**
  * Greenhouse public job board API — per-company, no key required.
@@ -40,41 +47,44 @@ export class GreenhouseProvider implements JobProvider {
   async fetch(query: JobQuery): Promise<NormalizedJob[]> {
     const boards = query.boardTokens?.length ? query.boardTokens : this.boards;
     const keywords = (query.keywords ?? []).map((k) => k.toLowerCase()).filter(Boolean);
-    const results: NormalizedJob[] = [];
 
-    for (const token of boards) {
-      try {
-        const url = `https://boards-api.greenhouse.io/v1/boards/${token}/jobs?content=true`;
-        const res = await fetch(url);
-        if (!res.ok) {
-          continue;
+    // Crawl boards in parallel (bounded) so a search over ~50 boards takes
+    // seconds instead of minutes; skip boards that are slow or unavailable.
+    const batches = await mapWithConcurrency(boards, 8, (token) => this.fetchBoard(token, keywords));
+    return batches.flat();
+  }
+
+  private async fetchBoard(token: string, keywords: string[]): Promise<NormalizedJob[]> {
+    const results: NormalizedJob[] = [];
+    try {
+      const url = `https://boards-api.greenhouse.io/v1/boards/${token}/jobs?content=true`;
+      const res = await fetchWithTimeout(url);
+      if (!res.ok) return results;
+      const data = (await res.json()) as { jobs?: GreenhouseJob[] };
+      for (const j of data.jobs ?? []) {
+        const description = stripHtml(j.content ?? '');
+        // Keep results relevant to the search instead of dumping whole boards.
+        if (keywords.length) {
+          const haystack = `${j.title} ${description}`.toLowerCase();
+          if (!keywords.some((kw) => haystack.includes(kw))) continue;
         }
-        const data = (await res.json()) as { jobs?: GreenhouseJob[] };
-        for (const j of data.jobs ?? []) {
-          const description = stripHtml(j.content ?? '');
-          // Keep results relevant to the search instead of dumping whole boards.
-          if (keywords.length) {
-            const haystack = `${j.title} ${description}`.toLowerCase();
-            if (!keywords.some((kw) => haystack.includes(kw))) continue;
-          }
-          results.push({
-            source: this.source,
-            sourceId: `${token}-${j.id}`,
-            title: j.title,
-            company: token,
-            location: j.location?.name,
-            country: j.location?.name,
-            remote: /remote/i.test(j.location?.name ?? ''),
-            description,
-            url: j.absolute_url,
-            applyUrl: j.absolute_url,
-            tags: [],
-            postedAt: j.updated_at ? new Date(j.updated_at) : undefined,
-          });
-        }
-      } catch (err) {
-        this.logger.warn(`Greenhouse board ${token} failed: ${(err as Error).message}`);
+        results.push({
+          source: this.source,
+          sourceId: `${token}-${j.id}`,
+          title: j.title,
+          company: token,
+          location: j.location?.name,
+          country: j.location?.name,
+          remote: /remote/i.test(j.location?.name ?? ''),
+          description,
+          url: j.absolute_url,
+          applyUrl: j.absolute_url,
+          tags: [],
+          postedAt: j.updated_at ? new Date(j.updated_at) : undefined,
+        });
       }
+    } catch (err) {
+      this.logger.warn(`Greenhouse board ${token} failed: ${(err as Error).message}`);
     }
     return results;
   }

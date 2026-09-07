@@ -39,13 +39,17 @@ export class JobsController {
   }
 
   @Post('search')
-  triggerSearch(@Body() dto: TriggerSearchDto) {
-    return this.jobs.aggregate({
-      keywords: dto.keywords ?? ['software engineer'],
-      countries: dto.countries ?? [],
-      boardTokens: dto.boardTokens,
-      limit: 50,
-    });
+  @UseGuards(OptionalJwtAuthGuard)
+  triggerSearch(@Body() dto: TriggerSearchDto, @Req() req: { user?: { id: string } }) {
+    return this.jobs.searchAndAggregate(
+      {
+        keywords: dto.keywords ?? [],
+        countries: dto.countries ?? [],
+        boardTokens: dto.boardTokens,
+        limit: 50,
+      },
+      req.user?.id,
+    );
   }
 
   @Post('internal/daily-hunt')
