@@ -17,18 +17,25 @@ export class TheMuseProvider implements JobProvider {
 
   async fetch(query: JobQuery): Promise<NormalizedJob[]> {
     const key = process.env.THEMUSE_API_KEY;
-    const pages = 2;
+    const pages = Number(process.env.THEMUSE_PAGES ?? 4);
+    const keywords = (query.keywords ?? []).map((k) => k.toLowerCase()).filter(Boolean);
     const results: NormalizedJob[] = [];
     for (let page = 0; page < pages; page++) {
       try {
         const params = new URLSearchParams({ page: String(page) });
         if (key) params.set('api_key', key);
+        for (const location of query.countries ?? []) params.append('location', location);
         const url = `https://www.themuse.com/api/public/jobs?${params.toString()}`;
         const res = await fetch(url);
         if (!res.ok) break;
         const data = (await res.json()) as { results?: MuseJob[] };
         for (const j of data.results ?? []) {
           const loc = j.locations?.[0]?.name;
+          const description = stripHtml(j.contents ?? '');
+          if (keywords.length) {
+            const haystack = `${j.name} ${description}`.toLowerCase();
+            if (!keywords.some((kw) => haystack.includes(kw))) continue;
+          }
           results.push({
             source: this.source,
             sourceId: String(j.id),
@@ -37,7 +44,7 @@ export class TheMuseProvider implements JobProvider {
             location: loc,
             country: loc,
             remote: /remote|flexible/i.test(loc ?? ''),
-            description: stripHtml(j.contents ?? ''),
+            description,
             url: j.refs?.landing_page ?? '',
             applyUrl: j.refs?.landing_page,
             tags: (j.categories ?? []).map((c) => c.name),

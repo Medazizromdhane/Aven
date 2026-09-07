@@ -171,8 +171,9 @@ function JobCard({ job, token, onNotice }: { job: Job; token: string | null; onN
   const [generating, setGenerating] = useState(false);
   const [cardError, setCardError] = useState('');
 
-  const requirements = extractRequirements(job.description);
-  const email = extractEmail(job.description);
+  const description = cleanText(job.description);
+  const requirements = extractRequirements(description);
+  const email = extractEmail(description);
   const applyHref = job.applyUrl ?? job.url;
   const postedLabel = job.postedAt
     ? new Intl.DateTimeFormat('fr-FR', { dateStyle: 'medium' }).format(new Date(job.postedAt))
@@ -221,7 +222,7 @@ function JobCard({ job, token, onNotice }: { job: Job; token: string | null; onN
         <div>
           <h3 className="text-lg font-semibold text-[var(--ink)]">{job.title}</h3>
           <p className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-sm text-[var(--muted)]">
-            <span className="font-medium text-[var(--ink)]">{job.company}</span>
+            <span className="font-medium text-[var(--ink)]">{formatCompany(job.company)}</span>
             {job.location && <span className="inline-flex items-center gap-1"><MapPin size={12} /> {job.location}</span>}
             {postedLabel && <span>· {postedLabel}</span>}
           </p>
@@ -234,7 +235,7 @@ function JobCard({ job, token, onNotice }: { job: Job; token: string | null; onN
       </div>
 
       <div className="mt-3 flex flex-wrap gap-2 text-xs">
-        {job.source && <Badge>{job.source}</Badge>}
+        {job.source && <Badge>{formatSource(job.source)}</Badge>}
         {job.remote && <Badge>{t('remoteBadge')}</Badge>}
         {job.hasVisaSponsorship && <Badge className="bg-emerald-50 text-emerald-700">{t('visaBadge')}</Badge>}
         {job.relocationSupport && <Badge>{t('relocationBadge')}</Badge>}
@@ -242,7 +243,7 @@ function JobCard({ job, token, onNotice }: { job: Job; token: string | null; onN
       </div>
 
       {job.description && (
-        <p className="job-description mt-4">{job.description.slice(0, 240)}{job.description.length > 240 ? '…' : ''}</p>
+        <p className="job-description mt-4">{description.slice(0, 240)}{description.length > 240 ? '…' : ''}</p>
       )}
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -326,6 +327,61 @@ function extractEmail(description?: string): string | null {
   if (!description) return null;
   const match = description.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
   return match ? match[0] : null;
+}
+
+/** Safety net for records saved before the server-side HTML fix: decode entities and drop any leftover tags. */
+function cleanText(input?: string): string {
+  if (!input) return '';
+  let text = input;
+  for (let pass = 0; pass < 2; pass++) {
+    text = decodeEntities(text)
+      .replace(/<\s*(br|\/p|\/div|\/li|\/h[1-6])\s*\/?>/gi, '\n')
+      .replace(/<[^>]+>/g, ' ');
+  }
+  return text.replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim();
+}
+
+function decodeEntities(input: string): string {
+  return input
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&quot;/gi, '"')
+    .replace(/&apos;/gi, "'")
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => fromCode(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec) => fromCode(Number(dec)))
+    .replace(/&amp;/gi, '&');
+}
+
+function fromCode(code: number): string {
+  if (!Number.isFinite(code) || code < 0 || code > 0x10ffff) return '';
+  try {
+    return String.fromCodePoint(code);
+  } catch {
+    return '';
+  }
+}
+
+/** Board tokens are stored lowercase (e.g. "gitlab"); present them nicely. */
+function formatCompany(company?: string): string {
+  if (!company) return '';
+  if (/\s/.test(company)) return company;
+  return company
+    .replace(/[-_]+/g, ' ')
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/** Turn a source enum (GREENHOUSE, THEMUSE) into a readable label. */
+function formatSource(source: string): string {
+  const labels: Record<string, string> = {
+    GREENHOUSE: 'Greenhouse',
+    LEVER: 'Lever',
+    REMOTIVE: 'Remotive',
+    THEMUSE: 'The Muse',
+    ADZUNA: 'Adzuna',
+    JSEARCH: 'Google Jobs',
+  };
+  return labels[source] ?? source.charAt(0) + source.slice(1).toLowerCase();
 }
 
 function Badge({ children, className = '' }: { children: React.ReactNode; className?: string }) {

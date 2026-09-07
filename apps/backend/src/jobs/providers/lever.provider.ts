@@ -11,14 +11,27 @@ export class LeverProvider implements JobProvider {
   readonly source = JobSource.LEVER;
   private readonly logger = new Logger(LeverProvider.name);
 
-  private readonly defaultCompanies = ['netflix', 'plaid', 'ramp', 'brex'];
+  private readonly defaultCompanies = [
+    'netflix', 'plaid', 'ramp', 'brex', 'mercury', 'faire', 'nubank', 'gitbook',
+    'attentive', 'pilot', 'ashby', 'loom', 'clever', 'sardine', 'rippling',
+    'metabase', 'census', 'vanta', 'welcometothejungle', 'swile', 'alan', 'qonto',
+  ];
+
+  private get companies(): string[] {
+    const configured = (process.env.LEVER_COMPANIES ?? '')
+      .split(',')
+      .map((token) => token.trim())
+      .filter(Boolean);
+    return configured.length ? configured : this.defaultCompanies;
+  }
 
   isEnabled(): boolean {
     return true;
   }
 
   async fetch(query: JobQuery): Promise<NormalizedJob[]> {
-    const companies = query.boardTokens?.length ? query.boardTokens : this.defaultCompanies;
+    const companies = query.boardTokens?.length ? query.boardTokens : this.companies;
+    const keywords = (query.keywords ?? []).map((k) => k.toLowerCase()).filter(Boolean);
     const results: NormalizedJob[] = [];
 
     for (const company of companies) {
@@ -30,6 +43,11 @@ export class LeverProvider implements JobProvider {
         }
         const data = (await res.json()) as LeverJob[];
         for (const j of data) {
+          const description = stripHtml(j.descriptionPlain ?? j.description ?? '');
+          if (keywords.length) {
+            const haystack = `${j.text} ${description}`.toLowerCase();
+            if (!keywords.some((kw) => haystack.includes(kw))) continue;
+          }
           results.push({
             source: this.source,
             sourceId: j.id,
@@ -38,7 +56,7 @@ export class LeverProvider implements JobProvider {
             location: j.categories?.location,
             country: j.categories?.location,
             remote: /remote/i.test(j.categories?.location ?? '' + j.workplaceType),
-            description: stripHtml(j.descriptionPlain ?? j.description ?? ''),
+            description,
             url: j.hostedUrl,
             applyUrl: j.applyUrl ?? j.hostedUrl,
             tags: j.categories?.team ? [j.categories.team] : [],

@@ -84,7 +84,9 @@ export class GroqService {
       const raw = await this.chat(messages, { ...options, json: true });
       return this.safeParse<T>(raw, fallback);
     } catch (err) {
-      this.logger.warn(`chatJson failed, using fallback: ${(err as Error).message}`);
+      // Surface at error level: a swallowed failure here silently returns empty
+      // data (e.g. a CV parsed as blank), which looks like "nothing was saved".
+      this.logger.error(`chatJson failed, using fallback: ${(err as Error).message}`);
       return fallback;
     }
   }

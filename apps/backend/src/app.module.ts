@@ -13,9 +13,11 @@ import { GenerationModule } from './generation/generation.module';
 import { ApplicationsModule } from './applications/applications.module';
 import { StorageModule } from './storage/storage.module';
 import { HealthController } from './health.controller';
+import { KeepAliveService } from './keep-alive.service';
 
 @Module({
   controllers: [HealthController],
+  providers: [KeepAliveService],
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ScheduleModule.forRoot(),

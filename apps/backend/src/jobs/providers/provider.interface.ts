@@ -38,12 +38,42 @@ export interface JobQuery {
 
 /** Strip HTML tags to plain text (providers return HTML descriptions). */
 export function stripHtml(html: string): string {
-  return (html ?? '')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/\s+/g, ' ')
+  if (!html) return '';
+  let text = html;
+  // Decode entities, then strip tags — twice, because providers such as
+  // Greenhouse return entity-encoded markup (e.g. "&lt;p&gt;...&quot;") which
+  // only becomes real HTML after the first decode and must then be removed.
+  for (let pass = 0; pass < 2; pass++) {
+    text = decodeHtmlEntities(text)
+      .replace(/<\s*(br|\/p|\/div|\/li|\/h[1-6])\s*\/?>/gi, '\n')
+      .replace(/<[^>]+>/g, ' ');
+  }
+  return text
+    .replace(/[ \t\f\v]+/g, ' ')
+    .replace(/\n\s*\n\s*\n+/g, '\n\n')
+    .replace(/[ \t]*\n[ \t]*/g, '\n')
     .trim();
+}
+
+/** Decode the HTML entities commonly seen in job-board descriptions. */
+function decodeHtmlEntities(input: string): string {
+  return input
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&quot;/gi, '"')
+    .replace(/&apos;/gi, "'")
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&#x([0-9a-f]+);/gi, (_, hex) => safeFromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec) => safeFromCodePoint(Number(dec)))
+    // Decode &amp; last so sequences like "&amp;lt;" survive the earlier passes.
+    .replace(/&amp;/gi, '&');
+}
+
+function safeFromCodePoint(code: number): string {
+  if (!Number.isFinite(code) || code < 0 || code > 0x10ffff) return '';
+  try {
+    return String.fromCodePoint(code);
+  } catch {
+    return '';
+  }
 }

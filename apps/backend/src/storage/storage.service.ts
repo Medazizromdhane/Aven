@@ -32,8 +32,18 @@ export class StorageService {
       const forcePathStyle =
         process.env.STORAGE_FORCE_PATH_STYLE === 'true' ||
         (process.env.STORAGE_FORCE_PATH_STYLE !== 'false' && isSupabase);
+      const region = process.env.STORAGE_REGION ?? 'auto';
+      if (isSupabase && (!process.env.STORAGE_REGION || region === 'auto')) {
+        // Supabase signs S3 requests against the project's real region. Using the
+        // Cloudflare-R2 style "auto" region makes every request fail with
+        // SignatureDoesNotMatch, so uploads (and CV saves) silently break.
+        this.logger.warn(
+          'STORAGE_REGION is "auto" but the endpoint is Supabase. Set STORAGE_REGION to your ' +
+            'project region shown under Storage → S3 access (e.g. eu-central-1), or S3 uploads will fail.',
+        );
+      }
       this.client = new S3Client({
-        region: process.env.STORAGE_REGION ?? 'auto',
+        region,
         endpoint,
         forcePathStyle,
         credentials: { accessKeyId, secretAccessKey },
@@ -71,14 +81,23 @@ export class StorageService {
     const key = `${keyPrefix}/${randomUUID()}${this.extFor(contentType)}`;
 
     if (this.client) {
-      await this.client.send(
-        new PutObjectCommand({
-          Bucket: this.bucket,
-          Key: key,
-          Body: buffer,
-          ContentType: contentType,
-        }),
-      );
+      try {
+        await this.client.send(
+          new PutObjectCommand({
+            Bucket: this.bucket,
+            Key: key,
+            Body: buffer,
+            ContentType: contentType,
+          }),
+        );
+      } catch (err) {
+        const e = err as { name?: string; message?: string; $metadata?: { httpStatusCode?: number } };
+        this.logger.error(
+          `Storage upload failed (bucket="${this.bucket}", key="${key}", ` +
+            `status=${e.$metadata?.httpStatusCode}, code=${e.name}): ${e.message}`,
+        );
+        throw new ServiceUnavailableException('Failed to store the uploaded file');
+      }
       return key;
     }
 

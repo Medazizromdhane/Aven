@@ -11,15 +11,35 @@ export class GreenhouseProvider implements JobProvider {
   readonly source = JobSource.GREENHOUSE;
   private readonly logger = new Logger(GreenhouseProvider.name);
 
-  // Sensible defaults: well-known boards that frequently sponsor visas.
-  private readonly defaultBoards = ['stripe', 'gitlab', 'databricks', 'airbnb', 'coinbase'];
+  // Sensible defaults: a broad mix of companies (not just big names) that hire
+  // internationally and frequently sponsor visas. Extend at runtime with
+  // GREENHOUSE_BOARDS (comma-separated) without a code change.
+  private readonly defaultBoards = [
+    'stripe', 'gitlab', 'databricks', 'airbnb', 'coinbase', 'robinhood',
+    'doordash', 'instacart', 'discord', 'figma', 'dropbox', 'cloudflare',
+    'twilio', 'asana', 'elastic', 'hashicorp', 'mongodb', 'samsara', 'affirm',
+    'gusto', 'reddit', 'pinterest', 'lyft', 'sofi', 'benchling', 'gemini',
+    'chainalysis', 'wise', 'deel', 'monzo', 'checkr', 'flexport', 'nuro',
+    'scaleai', 'weightsandbiases', 'vercel', 'retool', 'ramp', 'mistralai',
+    'huggingface', 'anthropic', 'openai', 'sonarsource', 'contentful',
+    'algolia', 'typeform', 'gocardless', 'bumble', 'personio', 'celonis',
+  ];
+
+  private get boards(): string[] {
+    const configured = (process.env.GREENHOUSE_BOARDS ?? '')
+      .split(',')
+      .map((token) => token.trim())
+      .filter(Boolean);
+    return configured.length ? configured : this.defaultBoards;
+  }
 
   isEnabled(): boolean {
     return true;
   }
 
   async fetch(query: JobQuery): Promise<NormalizedJob[]> {
-    const boards = query.boardTokens?.length ? query.boardTokens : this.defaultBoards;
+    const boards = query.boardTokens?.length ? query.boardTokens : this.boards;
+    const keywords = (query.keywords ?? []).map((k) => k.toLowerCase()).filter(Boolean);
     const results: NormalizedJob[] = [];
 
     for (const token of boards) {
@@ -31,6 +51,12 @@ export class GreenhouseProvider implements JobProvider {
         }
         const data = (await res.json()) as { jobs?: GreenhouseJob[] };
         for (const j of data.jobs ?? []) {
+          const description = stripHtml(j.content ?? '');
+          // Keep results relevant to the search instead of dumping whole boards.
+          if (keywords.length) {
+            const haystack = `${j.title} ${description}`.toLowerCase();
+            if (!keywords.some((kw) => haystack.includes(kw))) continue;
+          }
           results.push({
             source: this.source,
             sourceId: `${token}-${j.id}`,
@@ -39,7 +65,7 @@ export class GreenhouseProvider implements JobProvider {
             location: j.location?.name,
             country: j.location?.name,
             remote: /remote/i.test(j.location?.name ?? ''),
-            description: stripHtml(j.content ?? ''),
+            description,
             url: j.absolute_url,
             applyUrl: j.absolute_url,
             tags: [],

@@ -68,9 +68,12 @@ Every service below has a genuinely free tier that does **not** ask for a card.
 1. Create a project at supabase.com → **Storage** → create a public bucket `visahunter`.
 2. Settings → Storage → S3 access: copy the endpoint and access keys.
 4. Set `STORAGE_ENDPOINT`, `STORAGE_ACCESS_KEY_ID`, `STORAGE_SECRET_ACCESS_KEY`,
-  `STORAGE_BUCKET`, and `STORAGE_REGION=auto` in Render.
+  `STORAGE_BUCKET`, and `STORAGE_REGION` in Render.
   > The endpoint must look like `https://PROJECT_REF.supabase.co/storage/v1/s3`.
   > Do not include the bucket name before the project ref.
+  > **`STORAGE_REGION` must be your project's real region** (shown under
+  > Storage → S3 access, e.g. `eu-central-1`). `auto` only works for Cloudflare R2
+  > and makes Supabase uploads fail with `SignatureDoesNotMatch`.
 
 ### Step D — One-click app deployment (Render Blueprint)
 1. Push this repo to GitHub.
@@ -97,13 +100,25 @@ The backend is available at the public URL for `aven-api`; its health check is
 
 ### Step F — Daily job hunt on a free (sleeping) backend
 The in-app cron (`JobsCronService`, 6 AM daily) won't fire while a free Render
-instance is asleep. Two free options:
+instance is asleep. The backend ships with a built-in keep-alive (`KeepAliveService`)
+that self-pings `/api/health` every 10 minutes using `RENDER_EXTERNAL_URL`, so the
+service stays warm automatically. Tune it with `KEEP_ALIVE_INTERVAL_MS` or disable
+with `KEEP_ALIVE_ENABLED=false`. To also *run* the hunt on schedule:
 - Schedule `POST https://YOUR-RENDER-URL/api/jobs/internal/daily-hunt` in
   **cron-job.org** (free), with header `x-cron-secret: YOUR_JOBS_CRON_SECRET`.
   Add the same `JOBS_CRON_SECRET` to Render. This wakes the service and runs the
   user-aware hunt. Do not expose this endpoint without the secret.
-- A cheaper fallback is a periodic `GET https://YOUR-RENDER-URL/api/health` ping,
-  but that only keeps the service warm; it does not run a hunt.
+
+### Step F-bis — Real job aggregation (Google Jobs / LinkedIn / Indeed)
+By default the app pulls from keyless boards (Greenhouse, Lever, Remotive, The Muse),
+which skews toward well-known companies. For broad, real aggregation add free keys:
+- `RAPIDAPI_KEY` — [JSearch](https://rapidapi.com/letscrape-6bRBa3QguO5/api/jsearch)
+  aggregates Google for Jobs (LinkedIn, Indeed, Glassdoor postings).
+- `ADZUNA_APP_ID` + `ADZUNA_APP_KEY` — [Adzuna](https://developer.adzuna.com/) boards.
+
+Optionally widen the keyless coverage with `GREENHOUSE_BOARDS` / `LEVER_COMPANIES`
+(comma-separated tokens). LinkedIn and Google Jobs have no free public API and
+cannot be scraped directly; JSearch is the supported way to surface those postings.
 
 ### Step G — Email (Resend)
 1. Get an API key at resend.com → set `RESEND_API_KEY`.
